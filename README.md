@@ -1,0 +1,2 @@
+# 39-COLLABORATION-SERVER-DAISO
+PLAY SOPT 39기 합동 세미나 모바일 앱 1조 - 다이소
