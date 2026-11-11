@@ -1,0 +1,12 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: daiso
+
+  profiles:
+    default: local
+
+  config:
+    import: optional:file:.env[.properties]

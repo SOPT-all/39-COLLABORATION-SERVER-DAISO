@@ -63,5 +63,6 @@ out/
 .vscode/
 
 # IntelliJ IDEA
+.env
 .idea/
 *.iml
