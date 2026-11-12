@@ -63,10 +63,6 @@
 
 ## ADR 목록
 
-아직 등록된 ADR이 없습니다. 새 문서를 작성하면 아래 형식으로 추가합니다.
-
-```markdown
 | 번호 | 결정 | 상태 |
 | --- | --- | --- |
-| 0001 | [패키지 구조](./0001-package-structure.md) | 제안 |
-```
+| 0001 | [Database Choice](./0001-use-mysql.md) | Draft |
