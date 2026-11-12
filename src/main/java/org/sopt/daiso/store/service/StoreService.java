@@ -2,8 +2,8 @@ package org.sopt.daiso.store.service;
 
 import org.sopt.daiso.store.dto.StoreFavoriteResponse;
 import org.sopt.daiso.store.entity.Store;
-import org.sopt.daiso.store.exception.StoreErrorCode;
-import org.sopt.daiso.store.exception.StoreException;
+import org.sopt.daiso.global.exception.StoreErrorCode;
+import org.sopt.daiso.global.exception.StoreException;
 import org.sopt.daiso.store.repository.StoreRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

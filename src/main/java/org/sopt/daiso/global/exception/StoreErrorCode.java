@@ -1,6 +1,5 @@
-package org.sopt.daiso.store.exception;
+package org.sopt.daiso.global.exception;
 
-import org.sopt.daiso.global.exception.ErrorCode;
 import org.springframework.http.HttpStatus;
 
 public enum StoreErrorCode implements ErrorCode {

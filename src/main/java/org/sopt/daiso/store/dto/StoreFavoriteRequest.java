@@ -1,8 +1,8 @@
 package org.sopt.daiso.store.dto;
 
 import org.sopt.daiso.global.exception.CommonErrorCode;
-import org.sopt.daiso.store.exception.StoreErrorCode;
-import org.sopt.daiso.store.exception.StoreException;
+import org.sopt.daiso.global.exception.StoreErrorCode;
+import org.sopt.daiso.global.exception.StoreException;
 import tools.jackson.databind.JsonNode;
 
 public record StoreFavoriteRequest(boolean favorite) {
