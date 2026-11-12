@@ -107,7 +107,7 @@ macOS/zsh에서는 현재 명령에만 검증 DB 설정을 전달합니다.
 MIGRATION_DB_URL='jdbc:mysql://127.0.0.1:<검증 포트>/<검증 DB>?allowPublicKeyRetrieval=true&sslMode=DISABLED' \
 MIGRATION_DB_USER='<검증 계정>' \
 MIGRATION_DB_PASSWORD='<검증 비밀번호>' \
-./gradlew test --tests org.sopt.daiso.FlywayMigrationTests --rerun-tasks
+./gradlew test --tests org.sopt.daiso.FlywayMigrationTests --tests org.sopt.daiso.store.StoreFavoriteIntegrationTest --rerun-tasks
 ```
 
 Windows PowerShell:
@@ -116,10 +116,10 @@ Windows PowerShell:
 $env:MIGRATION_DB_URL='jdbc:mysql://127.0.0.1:<검증 포트>/<검증 DB>?allowPublicKeyRetrieval=true&sslMode=DISABLED'
 $env:MIGRATION_DB_USER='<검증 계정>'
 $env:MIGRATION_DB_PASSWORD='<검증 비밀번호>'
-./gradlew.bat test --tests org.sopt.daiso.FlywayMigrationTests --rerun-tasks
+./gradlew.bat test --tests org.sopt.daiso.FlywayMigrationTests --tests org.sopt.daiso.store.StoreFavoriteIntegrationTest --rerun-tasks
 ```
 
-`MIGRATION_DB_URL`이 없으면 해당 검증 테스트는 건너뜁니다. 테스트는 migration 이력, 테이블 생성, 자동 ID, nullable 재고, 외래키와 중복 방지를 확인합니다. 엔티티 구현 전이므로 실제 엔티티 매핑 검증은 엔티티 추가 후 수행해야 합니다.
+`MIGRATION_DB_URL`이 없으면 해당 검증 테스트는 건너뜁니다. 테스트는 migration 이력, 테이블 생성, 자동 ID, nullable 재고, 외래키와 중복 방지를 확인합니다. Store 엔티티 매핑과 찜 API는 `StoreFavoriteIntegrationTest`에서 같은 migration 프로파일로 검증합니다. 별도 검증 DB 환경변수가 있어야 실행되며, 실제 HTTP 요청 후 커밋 결과·반복 요청·롤백·다른 컬럼 보존을 확인합니다.
 
 ## 코드와 컨벤션
 
@@ -156,9 +156,9 @@ $env:MIGRATION_DB_PASSWORD='<검증 비밀번호>'
 - 조회 Service는 `@Transactional(readOnly = true)`, 변경 Service는 `@Transactional`을 사용한다.
 - Entity는 의미 있는 도메인 메서드로 상태를 변경한다. Request·Response DTO를 Entity와 분리하고 Entity를 직접 응답하지 않는다.
 - 공통 응답·예외 처리는 `global`에서 관리한다. 사용하지 않는 클래스·계층이나 불필요한 인터페이스는 미리 만들지 않는다.
-- 오류 코드는 HTTP 상태·코드·메시지를 제공하는 `ErrorCode` 계약과 공통/도메인별 Enum으로 관리한다. `BusinessException`은 RuntimeException을 상속하는 추상 클래스로 ErrorCode를 보관하고 도메인 예외가 상속한다.
+- 오류 코드는 `global.exception.ErrorType` Enum에서 HTTP 상태·코드·메시지와 함께 관리한다. `CustomException`은 RuntimeException을 상속하고 ErrorType을 보관하며, 공통·도메인 오류 모두 이 예외로 발생시킨다.
 - Service는 비즈니스 예외를 발생시키고, `@RestControllerAdvice`·`@ExceptionHandler`의 전역 처리기가 응답으로 변환한다. Controller마다 같은 try-catch를 반복하지 않는다.
-- 비즈니스 예외는 ErrorCode의 HTTP 상태로, DTO 검증 실패는 400으로, 예상하지 못한 예외는 500으로 처리한다. 서버 오류는 로그에 남기되 내부 정보는 응답에 노출하지 않는다. 응답 필드·본문 형식은 [API 계약](api/api-contract.md#23-공통-응답)을 따른다.
+- 비즈니스 예외는 ErrorType의 HTTP 상태로, DTO 검증 실패는 400으로, 예상하지 못한 예외는 500으로 처리한다. 서버 오류는 로그에 남기되 내부 정보는 응답에 노출하지 않는다. 응답 필드·본문 형식은 [API 계약](api/api-contract.md#23-공통-응답)을 따른다.
 
 ### 구현 범위와 확인 사항
 
