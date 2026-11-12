@@ -1,4 +1,4 @@
-﻿# Spec Delta
+# Spec Delta
 
 ## Purpose
 
@@ -7,7 +7,7 @@
 ## ADDED Requirements
 
 ### Requirement: 공유 찜 상태 저장
-시스템은 SHALL [API 계약](../../../../../docs/api/api-contract.md)에 따라 매장의 공유 찜 상태를 요청 값으로 저장하고 저장 결과를 반환한다.
+시스템은 SHALL [API 계약](../../../../../../docs/api/api-contract.md)에 따라 매장의 공유 찜 상태를 요청 값으로 저장하고 저장 결과를 반환한다.
 
 #### Scenario: 설정 후 해제
 - **WHEN** 존재하는 매장에 찜 설정 후 해제를 요청한다
