@@ -74,7 +74,7 @@
 | --- | --- | --- | --- | --- |
 | `PATCH` | `/stores/{storeId}/favorite` | [관심매장 찜](#4-관심매장-찜-설정-및-해제) | 김가영 | 구현됨 |
 | `GET` | `/products/{productId}/stores` | 상품 재고 조회 | 김가영 | 미구현 |
-| `GET` | `/products` | 상품 목록 조회 | 노성빈 | 미구현 |
+| `GET` | `/products` | [상품 목록 조회](#6-상품-목록-조회) | 노성빈 | 미구현 |
 | `PATCH` | `/products/{productId}/like` | [상품 좋아요](#5-상품-좋아요-설정-및-해제) | 노성빈 | 구현됨 |
 
 기능 요구사항·시나리오는 [OpenSpec](../../openspec/AGENTS.md)에서 관리한다. 이 문서의 Draft API 목록은 구현 완료된 기능 명세가 아니다.
@@ -165,16 +165,25 @@ Content-Type: application/json
 
 ## 6. 상품 목록 조회
 
-[노션 계약](https://app.notion.com/p/41114af65e068053bb99e20f1f55899b)을 기준으로 한 구현 예정 계약이며 현재 미구현이다.
+[노션 계약](https://app.notion.com/p/41114af65e068053bb99e20f1f55899b)과 사용자 확인을 반영한 구현 예정 계약이며 현재 미구현이다. [변경 제안](../../openspec/changes/product-list/proposal.md)에서 범위를, [제안 시나리오](../../openspec/changes/product-list/specs/product-list/spec.md)에서 동작을 확인한다.
 
-- `GET /api/v1/products`, 담당자: 노성빈.
-- 선택 쿼리 `keyword`는 앞뒤 공백을 제거하고 상품명 부분 일치 또는 품번 정확 일치로 검색한다. 생략·공백이면 전체 조회한다. 앱의 빈 검색어 제출 무시와 API의 전체 조회는 구분한다.
+- `GET /api/v1/products`, 담당자: 노성빈. 인증·사용자 ID·요청 본문은 사용하지 않는다.
+- 선택 쿼리 `keyword`(String)는 앞뒤 공백을 제거하고 상품명 부분 일치 또는 품번 정확 일치로 검색한다. 숫자로만 된 검색어에도 두 조건을 모두 적용하며 품번은 문자열로 비교한다. 생략·빈 문자열·공백이면 전체 조회한다. 앱의 빈 검색어 제출 무시와 API의 전체 조회는 구분한다.
+- 검색어의 `%`, `_`는 검색 범위를 넓히는 와일드카드가 아닌 일반 문자로 취급한다. 영문 대소문자 비교는 DB의 collation을 따르며 별도 검색 규칙을 추가하지 않는다. URL 예약 문자는 클라이언트가 인코딩해 전달한다.
 - 페이지네이션 없이 조건에 맞는 모든 상품을 ID 오름차순으로 반환한다. 별도 정렬·필터 옵션을 추가하지 않는다.
 - 성공은 `200`, 메시지는 `상품 목록을 조회했습니다.`이며 `data.products` 배열에 productId(BIGINT), productNumber·name·price·imageUrl·reviewCount(String), liked(boolean)를 담는다. 결과가 없으면 빈 배열이다.
+- 응답 항목은 null을 허용하지 않는다. imageUrl에는 실제 상품 이미지 또는 사용자가 준비한 “이미지 없음” 이미지의 URL을 저장하고 그대로 반환한다. API에서 임의의 기본 URL을 생성하거나 null·빈 문자열로 대체하지 않는다. liked는 [공통 정책](#24-상품-좋아요매장-찜)에 따른 저장값이다.
 - price는 서버에서 천 단위 쉼표와 `원`을 포함해 반환한다. reviewCount는 9,999 이하에서 쉼표를 적용하고 9,999 초과일 때만 `9999+`로 반환한다. `개`는 붙이지 않는다.
 - NEW 배지는 프론트에서 정적으로 표시한다. 별점은 제외하며 두 항목의 서버 필드를 추가하지 않는다.
 
-현행 V1의 가격·리뷰 수는 INT 컬럼이다. 위 문자열은 API 응답의 표시 형식이며 DB 타입 변경을 뜻하지 않는다. 상품 좋아요에서 추가한 Product·Repository를 이후 목록 조회에서 재사용한다.
+현행 V1의 가격·리뷰 수는 INT 컬럼이다. 위 문자열은 API 응답의 표시 형식이며 DB 타입 변경을 뜻하지 않는다. 상품 좋아요에서 추가한 Product·Repository를 재사용할 예정이다. 현재 V1과 Product는 상품 이미지 null을 허용하므로 위 필수 계약은 아직 구현되지 않았다. 후속 migration과 기존 데이터의 전환 절차는 [변경 설계](../../openspec/changes/product-list/design.md#migration-plan)에서 관리한다.
+
+요청 예시:
+
+```http
+GET /api/v1/products
+GET /api/v1/products?keyword=마스크팩
+```
 
 | 값 | price 응답 | reviewCount 응답 |
 | --- | --- | --- |
