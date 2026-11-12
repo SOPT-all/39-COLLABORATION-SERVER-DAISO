@@ -3,8 +3,8 @@ package org.sopt.daiso.store.controller;
 import org.sopt.daiso.global.response.ApiResponse;
 import org.sopt.daiso.store.dto.StoreFavoriteRequest;
 import org.sopt.daiso.store.dto.StoreFavoriteResponse;
-import org.sopt.daiso.global.exception.StoreErrorCode;
-import org.sopt.daiso.global.exception.StoreException;
+import org.sopt.daiso.global.exception.CustomException;
+import org.sopt.daiso.global.exception.ErrorType;
 import org.sopt.daiso.store.service.StoreService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -43,7 +43,7 @@ public class StoreController {
             }
             return id;
         } catch (NumberFormatException exception) {
-            throw new StoreException(StoreErrorCode.INVALID_STORE_ID);
+            throw new CustomException(ErrorType.INVALID_STORE_ID);
         }
     }
 }

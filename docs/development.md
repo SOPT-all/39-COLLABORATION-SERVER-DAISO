@@ -156,9 +156,9 @@ $env:MIGRATION_DB_PASSWORD='<검증 비밀번호>'
 - 조회 Service는 `@Transactional(readOnly = true)`, 변경 Service는 `@Transactional`을 사용한다.
 - Entity는 의미 있는 도메인 메서드로 상태를 변경한다. Request·Response DTO를 Entity와 분리하고 Entity를 직접 응답하지 않는다.
 - 공통 응답·예외 처리는 `global`에서 관리한다. 사용하지 않는 클래스·계층이나 불필요한 인터페이스는 미리 만들지 않는다.
-- 오류 코드는 HTTP 상태·코드·메시지를 제공하는 `ErrorCode` 계약과 공통/도메인별 Enum으로 관리한다. `BusinessException`은 RuntimeException을 상속하는 추상 클래스로 ErrorCode를 보관하고 도메인 예외가 상속한다.
+- 오류 코드는 `global.exception.ErrorType` Enum에서 HTTP 상태·코드·메시지와 함께 관리한다. `CustomException`은 RuntimeException을 상속하고 ErrorType을 보관하며, 공통·도메인 오류 모두 이 예외로 발생시킨다.
 - Service는 비즈니스 예외를 발생시키고, `@RestControllerAdvice`·`@ExceptionHandler`의 전역 처리기가 응답으로 변환한다. Controller마다 같은 try-catch를 반복하지 않는다.
-- 비즈니스 예외는 ErrorCode의 HTTP 상태로, DTO 검증 실패는 400으로, 예상하지 못한 예외는 500으로 처리한다. 서버 오류는 로그에 남기되 내부 정보는 응답에 노출하지 않는다. 응답 필드·본문 형식은 [API 계약](api/api-contract.md#23-공통-응답)을 따른다.
+- 비즈니스 예외는 ErrorType의 HTTP 상태로, DTO 검증 실패는 400으로, 예상하지 못한 예외는 500으로 처리한다. 서버 오류는 로그에 남기되 내부 정보는 응답에 노출하지 않는다. 응답 필드·본문 형식은 [API 계약](api/api-contract.md#23-공통-응답)을 따른다.
 
 ### 구현 범위와 확인 사항
 

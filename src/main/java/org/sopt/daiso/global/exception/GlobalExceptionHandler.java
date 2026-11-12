@@ -16,25 +16,25 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException exception) {
-        return error(exception.getErrorCode());
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ErrorResponse> handleCustomException(CustomException exception) {
+        return error(exception.getErrorType());
     }
 
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException exception,
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        ErrorCode code = CommonErrorCode.INVALID_REQUEST;
+        ErrorType code = ErrorType.INVALID_REQUEST;
         return ResponseEntity.status(code.getStatus()).body(new ErrorResponse(code.getCode(), code.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpectedException(Exception exception) {
         log.error("요청 처리 중 서버 오류가 발생했습니다.", exception);
-        return error(CommonErrorCode.INTERNAL_SERVER_ERROR);
+        return error(ErrorType.INTERNAL_SERVER_ERROR);
     }
 
-    private ResponseEntity<ErrorResponse> error(ErrorCode code) {
+    private ResponseEntity<ErrorResponse> error(ErrorType code) {
         return ResponseEntity.status(code.getStatus())
                 .body(new ErrorResponse(code.getCode(), code.getMessage()));
     }

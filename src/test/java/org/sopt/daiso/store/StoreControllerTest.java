@@ -7,8 +7,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.sopt.daiso.global.exception.GlobalExceptionHandler;
 import org.sopt.daiso.store.controller.StoreController;
 import org.sopt.daiso.store.dto.StoreFavoriteResponse;
-import org.sopt.daiso.global.exception.StoreErrorCode;
-import org.sopt.daiso.global.exception.StoreException;
+import org.sopt.daiso.global.exception.CustomException;
+import org.sopt.daiso.global.exception.ErrorType;
 import org.sopt.daiso.store.service.StoreService;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -84,7 +84,7 @@ class StoreControllerTest {
 
     @Test
     void returnsStoreNotFound() throws Exception {
-        when(service.changeFavorite(201, true)).thenThrow(new StoreException(StoreErrorCode.STORE_NOT_FOUND));
+        when(service.changeFavorite(201, true)).thenThrow(new CustomException(ErrorType.STORE_NOT_FOUND));
         mvc.perform(patch("/api/v1/stores/201/favorite").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"favorite\":true}"))
                 .andExpect(status().isNotFound())

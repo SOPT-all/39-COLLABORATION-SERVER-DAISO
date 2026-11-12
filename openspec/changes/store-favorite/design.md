@@ -1,4 +1,4 @@
-﻿# Design
+# Design
 
 ## Context
 
@@ -15,7 +15,7 @@
 - Controller → Service → JpaRepository 구조와 변경 트랜잭션·엔티티 도메인 메서드를 사용한다. 직접 SQL 갱신 대신 JPA 변경 감지를 사용한다.
 - Store에 DynamicUpdate를 적용해 찜 변경이 다른 컬럼을 덮어쓰지 않게 한다. 현재 API에 불필요한 버전 컬럼·잠금은 추가하지 않는다.
 - Jackson 3 JsonNode로 JSON 형태와 불리언 타입을 검증한 뒤 Request DTO로 변환한다. Boolean 자동 변환은 문자열·숫자를 허용할 수 있어 사용하지 않는다.
-- 공통 응답·ErrorCode·추상 BusinessException·전역 처리기와 Store 도메인 오류를 필요한 범위로 구현한다.
+- 공통 응답과 global.exception의 CustomException·ErrorType·GlobalExceptionHandler를 사용한다. 공통·매장 오류를 단일 Enum과 예외로 관리하여 현재 프로젝트 규모에 맞게 구조를 단순화한다.
 
 ## Risks / Trade-offs
 
