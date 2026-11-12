@@ -25,6 +25,9 @@ class FlywayMigrationTests {
         assertThat(jdbc.queryForObject(
                 "SELECT COUNT(*) FROM flyway_schema_history WHERE version = '1' AND success = 1",
                 Integer.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject(
+                "SELECT COUNT(*) FROM flyway_schema_history WHERE version = '2' AND success = 1",
+                Integer.class)).isEqualTo(1);
         assertThat(jdbc.queryForList("""
                 SELECT table_name FROM information_schema.tables
                 WHERE table_schema = DATABASE() AND table_name IN ('product', 'store', 'store_inventory')
@@ -35,8 +38,8 @@ class FlywayMigrationTests {
     @Transactional
     void generatedIdsAndInventoryConstraintsWork() {
         jdbc.update("""
-                INSERT INTO product (product_number, name, price, review_count, is_liked)
-                VALUES ('migration-check', '검증 상품', 1000, 0, FALSE)
+                INSERT INTO product (product_number, name, price, image_url, review_count, is_liked)
+                VALUES ('migration-check', '검증 상품', 1000, 'https://example.com/product.png', 0, FALSE)
                 """);
         Long productId = jdbc.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
         jdbc.update("""
@@ -65,5 +68,14 @@ class FlywayMigrationTests {
         assertThatThrownBy(() -> jdbc.update("""
                 INSERT INTO store_inventory (product_id, store_id, pickup_available) VALUES (?, -1, FALSE)
                 """, productId)).isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    @Transactional
+    void productImageIsRequired() {
+        assertThatThrownBy(() -> jdbc.update("""
+                INSERT INTO product (product_number, name, price, image_url, review_count, is_liked)
+                VALUES ('missing-image-check', '이미지 누락', 1000, NULL, 0, FALSE)
+                """)).isInstanceOf(DataIntegrityViolationException.class);
     }
 }

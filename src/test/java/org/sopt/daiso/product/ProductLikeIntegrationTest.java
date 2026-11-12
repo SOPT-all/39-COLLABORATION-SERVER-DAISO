@@ -49,7 +49,7 @@ class ProductLikeIntegrationTest {
     private Long createProduct(String number) {
         jdbc.update("""
                 INSERT INTO product (product_number, name, price, image_url, review_count, is_liked)
-                VALUES (?, '검증 상품', 1500, NULL, 12, FALSE)
+                VALUES (?, '검증 상품', 1500, 'https://example.com/original.png', 12, FALSE)
                 """, number);
         return jdbc.queryForObject("SELECT id FROM product WHERE product_number = ?", Long.class, number);
     }
@@ -80,7 +80,7 @@ class ProductLikeIntegrationTest {
                 .containsEntry("product_number", productNumber)
                 .containsEntry("name", "검증 상품")
                 .containsEntry("price", 1500)
-                .containsEntry("image_url", null)
+                .containsEntry("image_url", "https://example.com/original.png")
                 .containsEntry("review_count", 12);
         assertThat(savedLiked(otherProductId)).isFalse();
     }

@@ -26,7 +26,7 @@ public class Product {
     @Column(nullable = false)
     private int price;
 
-    @Column(name = "image_url", length = 2048)
+    @Column(name = "image_url", nullable = false, length = 2048)
     private String imageUrl;
 
     @Column(name = "review_count", nullable = false)
