@@ -82,14 +82,25 @@ class UpdatedErdMigrationTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"product", "store", "inventory"})
-    void rejectsLegacyNullBeforePersistentDdl(String field) throws Exception {
+    void rejectsLegacyNullWithoutFillingMissingValues(String field) throws Exception {
         seedV1(field.equals("product"), field.equals("store"), field.equals("inventory"));
         assertThatThrownBy(this::migrateV2).isInstanceOf(FlywayException.class);
         try (Connection connection = DriverManager.getConnection(url, user, password);
              Statement statement = connection.createStatement();
              ResultSet row = statement.executeQuery("SELECT DATA_TYPE FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'product' AND column_name = 'price'")) {
             assertThat(row.next()).isTrue();
-            assertThat(row.getString(1)).isEqualTo("int");
+            assertThat(row.getString(1)).isEqualTo(field.equals("product") ? "int" : "varchar");
+        }
+        String requiredColumn = switch (field) {
+            case "product" -> "SELECT image_url FROM product";
+            case "store" -> "SELECT image_url FROM store";
+            default -> "SELECT stock_quantity FROM store_inventory";
+        };
+        try (Connection connection = DriverManager.getConnection(url, user, password);
+             Statement statement = connection.createStatement();
+             ResultSet row = statement.executeQuery(requiredColumn)) {
+            assertThat(row.next()).isTrue();
+            assertThat(row.getObject(1)).isNull();
         }
         try (Connection connection = DriverManager.getConnection(url, user, password);
              Statement statement = connection.createStatement();

@@ -86,7 +86,7 @@ ADR 검사에서 ADR011은 [ADR 목록의 원문 누락 항목](adr/README.md#ad
 
 배포 스키마의 원본은 migration SQL이다. JPA `validate`는 테이블을 수정하지 않으며 모든 제약·데이터 변환을 보장하지 않으므로 SQL과 결과도 확인한다.
 
-V2는 영구 테이블 변경 전에 이미지·재고 NULL을 검사한다. NULL이 있으면 `chk_erd_v2_no_null` 제약 오류로 실패하며 빈 문자열·0으로 보정하지 않는다. 실제 데이터 보정 후 실패 이력을 확인하고 Flyway 복구 절차를 진행한다. MySQL DDL은 전체 롤백되지 않으므로 배포 전 백업과 업그레이드 검증을 수행한다.
+V2는 ALTER TABLE로 변경 ERD의 타입·NOT NULL 제약을 적용한다. MySQL strict SQL mode에서 기존 이미지·재고에 NULL이 있으면 해당 ALTER가 실패하며 빈 문자열·0으로 보정하지 않는다. 실제 데이터 보정 후 실패 이력을 확인하고 Flyway 복구 절차를 진행한다. MySQL DDL은 전체 롤백되지 않으므로 앞선 ALTER가 이미 적용되어 있을 수 있다. 배포 전 백업과 업그레이드 검증을 수행한다.
 
 ### Migration 파일 규칙
 
