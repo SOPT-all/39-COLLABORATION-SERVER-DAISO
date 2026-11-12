@@ -20,6 +20,8 @@
 
 - ProductStoreResponse의 표시용 getter에서 거리 문자열을 계산한다. 원본 distanceMeters와 DB 거리·JPQL 생성자는 유지하며 프론트는 distance를 그대로 표시한다. km는 BigDecimal로 소수 첫째 자리 HALF_UP 반올림하여 부동소수 오차를 피한다.
 
+- 영업 상태는 BusinessStatus Enum을 문자열로 매핑한다. JdbcTypeCode(VARCHAR)로 ERD의 VARCHAR(30)을 유지하며 DB ENUM 타입으로 바꾸지 않는다. OPEN·CLOSED는 직접 저장한 상태이며 품절은 stockQuantity=0, 픽업 미지원은 pickupAvailable=false로 구분한다.
+
 ## Risks / Trade-offs
 
 - 기존 NULL은 배포를 중단한다 → 운영자가 실제 값을 보정한 후 재실행한다. 검증은 별도 MySQL에서 수행한다.

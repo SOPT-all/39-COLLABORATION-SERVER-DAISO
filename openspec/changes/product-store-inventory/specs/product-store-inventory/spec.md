@@ -25,6 +25,10 @@
 - **WHEN** 매장 찜을 변경한 후 재고를 조회한다
 - **THEN** bookmarked에 저장된 공유 찜 상태를 반환한다
 
+#### Scenario: 영업 상태와 픽업·품절 구분
+- **WHEN** 영업 상태 CLOSED, 재고 0, 픽업 미지원 매장을 soldOut=false로 조회한다
+- **THEN** businessStatus=CLOSED, stockQuantity=0, pickupAvailable=false를 서로 독립적으로 반환한다
+
 ### Requirement: 거리 단위 표시
 시스템은 SHALL 원본 distanceMeters를 유지하고 화면 표시용 distance를 m 또는 km 문자열로 제공한다.
 

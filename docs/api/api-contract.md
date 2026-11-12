@@ -151,12 +151,12 @@ GET /api/v1/products/1001/stores?soldOut=false
 | data.stores[].storeId | BIGINT | 매장 고유 ID |
 | data.stores[].storeName | String | 매장명 |
 | data.stores[].imageUrl | String | 필수 매장 이미지 URL. 변경 ERD에 따라 null을 허용하지 않음 |
-| data.stores[].businessStatus | String | 저장된 영업 상태. 예: OPEN, CLOSED |
+| data.stores[].businessStatus | Enum(String) | 직접 저장한 영업 상태. OPEN: 영업중, CLOSED: 영업 전. 시간 기반 자동 계산 없음 |
 | data.stores[].bookmarked | Boolean | 공유 매장 찜 상태. favorite와 같은 값 |
 | data.stores[].distanceMeters | BIGINT | 원본 거리. 항상 미터 단위 |
 | data.stores[].distance | String | 표시용 거리. 1000m 미만은 m, 이상은 km. 소수 첫째 자리 반올림 및 불필요한 0 제거 |
-| data.stores[].stockQuantity | INT | 필수 재고 수량 |
-| data.stores[].pickupAvailable | Boolean | 픽업 지원 여부 |
+| data.stores[].stockQuantity | INT | 필수 재고 수량. 0은 품절이며 프론트에서 품절 표시 |
+| data.stores[].pickupAvailable | Boolean | true: 픽업 지원, false: 픽업 미지원. 재고 유무와 독립 |
 
 성공 응답: `200 OK`, 아래는 `soldOut=false` 예시다. 사용자 지시에 따라 이미지 NULL 예시 대신 변경 ERD의 NOT NULL을 적용한다.
 

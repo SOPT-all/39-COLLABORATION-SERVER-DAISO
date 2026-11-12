@@ -14,6 +14,7 @@ import org.sopt.daiso.product.controller.ProductController;
 import org.sopt.daiso.product.dto.ProductStoreResponse;
 import org.sopt.daiso.product.dto.ProductStoresResponse;
 import org.sopt.daiso.product.service.ProductService;
+import org.sopt.daiso.store.entity.BusinessStatus;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.dao.TransientDataAccessResourceException;
@@ -39,7 +40,7 @@ class ProductControllerTest {
     @Test
     void defaultsToExcludingSoldOutAndReturnsContractFields() throws Exception {
         when(service.findStores(1001, true)).thenReturn(new ProductStoresResponse(1001L, List.of(
-                new ProductStoreResponse(201L, "강남본점", "https://example.com/store.png", "OPEN", true, 850, 12, false))));
+                new ProductStoreResponse(201L, "강남본점", "https://example.com/store.png", BusinessStatus.OPEN, true, 850, 12, false))));
         mvc.perform(get("/api/v1/products/1001/stores"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
@@ -124,11 +125,21 @@ class ProductControllerTest {
             "1500, 1.5km", "1549, 1.5km", "1550, 1.6km", "2000, 2km", "12500, 12.5km"})
     void returnsDisplayDistanceAndPreservesMeters(long meters, String distance) throws Exception {
         when(service.findStores(1001, true)).thenReturn(new ProductStoresResponse(1001L, List.of(
-                new ProductStoreResponse(201L, "매장", "store.png", "OPEN", false, meters, 1, false))));
+                new ProductStoreResponse(201L, "매장", "store.png", BusinessStatus.OPEN, false, meters, 1, false))));
         mvc.perform(get("/api/v1/products/1001/stores"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.stores[0].distanceMeters").value(meters))
                 .andExpect(jsonPath("$.data.stores[0].distance").value(distance));
+    }
+    @Test
+    void returnsClosedSoldOutAndPickupUnsupportedValues() throws Exception {
+        when(service.findStores(1001, false)).thenReturn(new ProductStoresResponse(1001L, List.of(
+                new ProductStoreResponse(201L, "매장", "store.png", BusinessStatus.CLOSED, false, 850, 0, false))));
+        mvc.perform(get("/api/v1/products/1001/stores").param("soldOut", "false"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.stores[0].businessStatus").value("CLOSED"))
+                .andExpect(jsonPath("$.data.stores[0].stockQuantity").value(0))
+                .andExpect(jsonPath("$.data.stores[0].pickupAvailable").value(false));
     }
     private void assertFailure(int status, String code, String message) throws Exception {
         mvc.perform(get("/api/v1/products/1001/stores"))

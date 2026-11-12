@@ -12,6 +12,8 @@
 
 - [x] 2.4 거리 표시용 distance를 추가하고 999m·1000m 경계와 km 반올림의 HTTP 응답 및 문서를 검증한다.
 
+- [x] 2.5 영업 상태를 Enum으로 매핑하고 VARCHAR 유지·영업 상태·재고 0·픽업 미지원 응답을 HTTP 및 MySQL 테스트로 검증한다.
+
 ## 3. 통합 검증
 
 - [x] 3.1 bootJar·전체 테스트·OpenSpec strict·문서 링크·diff 검증을 수행한다.
