@@ -66,3 +66,4 @@
 | 번호 | 결정 | 상태 |
 | --- | --- | --- |
 | 0001 | [Database Choice](./0001-use-mysql.md) | Draft |
+| 0002 | [로컬은 JPA 자동 반영, 배포 환경은 Flyway로 스키마 관리](./0002-manage-schema-with-jpa-and-flyway.md) | 제안 |
