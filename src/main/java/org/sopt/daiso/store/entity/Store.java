@@ -19,7 +19,7 @@ public class Store {
     @Column(nullable = false, length = 255)
     private String name;
 
-    @Column(name = "image_url", length = 2048)
+    @Column(name = "image_url", nullable = false, length = 2048)
     private String imageUrl;
 
     @Column(name = "business_status", nullable = false, length = 30)

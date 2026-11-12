@@ -127,6 +127,80 @@ Content-Type: application/json
 {"code": "FAVORITE_REQUIRED", "message": "찜 상태는 필수입니다."}
 ```
 
+## 5. 상품별 매장 재고 조회
+
+- 담당자: 김가영
+- `GET /api/v1/products/{productId}/stores`
+- 인증·사용자 ID 및 요청 본문 없음.
+- 경로 `productId`: 필수 BIGINT. `1` 이상 `9223372036854775807` 이하 정수.
+- 쿼리 `soldOut`: 선택 boolean. 생략 시 `true`. `true`는 재고 1 이상만 조회하고, `false`는 품절 필터를 적용하지 않는다.
+- `soldOut`은 소문자 `true`·`false`만 허용하며 빈 값·숫자·중복 입력은 400이다.
+- 재고 관계가 없는 매장은 반환하지 않는다. 상품이 존재하되 조건에 맞는 결과가 없으면 200과 `stores: []`를 반환한다.
+- 정렬·페이지네이션은 정의하지 않는다.
+- 동작 시나리오: [상품 재고 조회 변경 명세](../../openspec/changes/product-store-inventory/specs/product-store-inventory/spec.md).
+
+```http
+GET /api/v1/products/1001/stores
+GET /api/v1/products/1001/stores?soldOut=false
+```
+
+| 응답 필드 | 타입 | 설명 |
+| --- | --- | --- |
+| data.productId | BIGINT | 상품 ID |
+| data.stores | Array<Object> | 조건에 맞는 매장 재고 목록 |
+| data.stores[].storeId | BIGINT | 매장 고유 ID |
+| data.stores[].storeName | String | 매장명 |
+| data.stores[].imageUrl | String | 필수 매장 이미지 URL. 변경 ERD에 따라 null을 허용하지 않음 |
+| data.stores[].businessStatus | String | 저장된 영업 상태. 예: OPEN, CLOSED |
+| data.stores[].bookmarked | Boolean | 공유 매장 찜 상태. favorite와 같은 값 |
+| data.stores[].distanceMeters | BIGINT | 매장까지의 거리 |
+| data.stores[].stockQuantity | INT | 필수 재고 수량 |
+| data.stores[].pickupAvailable | Boolean | 픽업 지원 여부 |
+
+성공 응답: `200 OK`, 아래는 `soldOut=false` 예시다. 사용자 지시에 따라 이미지 NULL 예시 대신 변경 ERD의 NOT NULL을 적용한다.
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "상품의 매장별 재고가 조회되었습니다.",
+  "data": {
+    "productId": 1001,
+    "stores": [
+      {
+        "storeId": 201,
+        "storeName": "강남본점",
+        "imageUrl": "https://example.com/stores/201.png",
+        "businessStatus": "OPEN",
+        "bookmarked": true,
+        "distanceMeters": 850,
+        "stockQuantity": 12,
+        "pickupAvailable": false
+      },
+      {
+        "storeId": 202,
+        "storeName": "역삼점",
+        "imageUrl": "https://example.com/stores/202.png",
+        "businessStatus": "CLOSED",
+        "bookmarked": false,
+        "distanceMeters": 1500,
+        "stockQuantity": 0,
+        "pickupAvailable": true
+      }
+    ]
+  }
+}
+```
+
+실패 응답은 공통 `code`, `message` 형식을 따른다. 저장소 연결·트랜잭션 시작 실패·조회 타임아웃은 이 조회 API에서 503으로 처리하고, 예상하지 못한 오류는 500으로 처리한다.
+
+| 상황 | HTTP 상태 | code | message |
+| --- | --- | --- | --- |
+| 상품 ID 형식·범위 오류 | 400 | INVALID_PRODUCT_ID | 유효하지 않은 상품 ID입니다. |
+| 잘못된 soldOut | 400 | INVALID_EXCLUDE_SOLD_OUT | 품절 제외 여부는 true 또는 false여야 합니다. |
+| 상품 없음 | 404 | PRODUCT_NOT_FOUND | 상품을 찾을 수 없습니다. |
+| 서버 내부 오류 | 500 | INTERNAL_SERVER_ERROR | 서버 내부 오류가 발생했습니다. |
+| 저장소 장애 | 503 | STORAGE_UNAVAILABLE | 일시적으로 매장별 재고를 조회할 수 없습니다. 잠시 후 다시 시도해 주세요. |
+
 ## 문서 작성 기준
 
 - 각 API에 메서드·경로, 인증·헤더, 입력 타입·필수값·제약·기본값, 요청·응답 예시, 상태 코드·오류 조건을 작성한다. 합의 전인 값은 미정으로 표시한다.

@@ -21,10 +21,10 @@ class FlywayMigrationTests {
     private JdbcTemplate jdbc;
 
     @Test
-    void initialMigrationIsAppliedSuccessfully() {
+    void migrationsAreAppliedSuccessfully() {
         assertThat(jdbc.queryForObject(
-                "SELECT COUNT(*) FROM flyway_schema_history WHERE version = '1' AND success = 1",
-                Integer.class)).isEqualTo(1);
+                "SELECT COUNT(*) FROM flyway_schema_history WHERE version IN ('1', '2') AND success = 1",
+                Integer.class)).isEqualTo(2);
         assertThat(jdbc.queryForList("""
                 SELECT table_name FROM information_schema.tables
                 WHERE table_schema = DATABASE() AND table_name IN ('product', 'store', 'store_inventory')
@@ -35,13 +35,13 @@ class FlywayMigrationTests {
     @Transactional
     void generatedIdsAndInventoryConstraintsWork() {
         jdbc.update("""
-                INSERT INTO product (product_number, name, price, review_count, is_liked)
-                VALUES ('migration-check', '검증 상품', 1000, 0, FALSE)
+                INSERT INTO product (product_number, name, price, image_url, review_count, is_liked)
+                VALUES ('migration-check', '검증 상품', '1000', 'https://example.com/product.png', '0', FALSE)
                 """);
         Long productId = jdbc.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
         jdbc.update("""
-                INSERT INTO store (name, business_status, is_favorite, distance)
-                VALUES ('검증 매장', 'OPEN', FALSE, 100)
+                INSERT INTO store (name, image_url, business_status, is_favorite, distance)
+                VALUES ('검증 매장', 'https://example.com/store.png', 'OPEN', FALSE, 100)
                 """);
         Long storeId = jdbc.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
         assertThat(productId).isPositive();
@@ -49,21 +49,21 @@ class FlywayMigrationTests {
 
         jdbc.update("""
                 INSERT INTO store_inventory (product_id, store_id, stock_quantity, pickup_available)
-                VALUES (?, ?, NULL, TRUE)
+                VALUES (?, ?, 0, TRUE)
                 """, productId, storeId);
         assertThat(jdbc.queryForObject("SELECT LAST_INSERT_ID()", Long.class)).isPositive();
         assertThat(jdbc.queryForObject("""
                 SELECT stock_quantity FROM store_inventory WHERE product_id = ? AND store_id = ?
-                """, Integer.class, productId, storeId)).isNull();
+                """, Integer.class, productId, storeId)).isZero();
 
         assertThatThrownBy(() -> jdbc.update("""
-                INSERT INTO store_inventory (product_id, store_id, pickup_available) VALUES (?, ?, FALSE)
+                INSERT INTO store_inventory (product_id, store_id, stock_quantity, pickup_available) VALUES (?, ?, 0, FALSE)
                 """, productId, storeId)).isInstanceOf(DataIntegrityViolationException.class);
         assertThatThrownBy(() -> jdbc.update("""
-                INSERT INTO store_inventory (product_id, store_id, pickup_available) VALUES (-1, ?, FALSE)
+                INSERT INTO store_inventory (product_id, store_id, stock_quantity, pickup_available) VALUES (-1, ?, 0, FALSE)
                 """, storeId)).isInstanceOf(DataIntegrityViolationException.class);
         assertThatThrownBy(() -> jdbc.update("""
-                INSERT INTO store_inventory (product_id, store_id, pickup_available) VALUES (?, -1, FALSE)
+                INSERT INTO store_inventory (product_id, store_id, stock_quantity, pickup_available) VALUES (?, -1, 0, FALSE)
                 """, productId)).isInstanceOf(DataIntegrityViolationException.class);
     }
 }

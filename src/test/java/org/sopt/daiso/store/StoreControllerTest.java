@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.sopt.daiso.global.exception.GlobalExceptionHandler;
+import org.sopt.daiso.global.exception.InventoryStorageExceptionHandler;
 import org.sopt.daiso.store.controller.StoreController;
 import org.sopt.daiso.store.dto.StoreFavoriteResponse;
 import org.sopt.daiso.global.exception.CustomException;
@@ -26,7 +27,7 @@ class StoreControllerTest {
     void setUp() {
         service = mock(StoreService.class);
         mvc = MockMvcBuilders.standaloneSetup(new StoreController(service))
-                .setControllerAdvice(new GlobalExceptionHandler()).build();
+                .setControllerAdvice(new InventoryStorageExceptionHandler(), new GlobalExceptionHandler()).build();
     }
 
     @ParameterizedTest
@@ -123,6 +124,15 @@ class StoreControllerTest {
                 .andExpect(jsonPath("$.type").doesNotExist())
                 .andExpect(jsonPath("$.status").doesNotExist());
         verifyNoInteractions(service);
+    }
+    @Test
+    void inventoryStorageAdviceDoesNotChangeFavoriteErrorContract() throws Exception {
+        when(service.changeFavorite(201, true)).thenThrow(
+                new org.springframework.transaction.CannotCreateTransactionException("private detail"));
+        mvc.perform(patch("/api/v1/stores/201/favorite").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"favorite\":true}"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code").value("INTERNAL_SERVER_ERROR"));
     }
     private void assertError(String body, String code, String message) throws Exception {
         mvc.perform(patch("/api/v1/stores/201/favorite").contentType(MediaType.APPLICATION_JSON).content(body))
