@@ -62,7 +62,15 @@ out/
 ### VS Code ###
 .vscode/
 
-# IntelliJ IDEA
+# Local environment
 .env
-.idea/
-*.iml
+.env.*
+!.env.example
+
+# macOS
+.DS_Store
+._*
+
+# Development harness generated files
+.tools/
+node_modules/
