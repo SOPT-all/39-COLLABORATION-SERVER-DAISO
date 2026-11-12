@@ -22,7 +22,7 @@ MADR 형식과 생성 템플릿은 [template.md](template.md)에서 관리한다
 | 번호 | 결정 | 상태 |
 | --- | --- | --- |
 | 0001 | Database Choice — 원문 확인 필요 | 미확인 |
-| 0002 | [로컬은 JPA 자동 반영, 배포 환경은 Flyway로 스키마 관리](./0002-manage-schema-with-jpa-and-flyway.md) | 제안 |
-| 0003 | [MADR과 adrs 및 OpenSpec으로 개발 문서를 관리한다](./0003-madr과-adrs-및-openspec으로-개발-문서를-관리한다.md) | 제안 |
+| 0002 | [로컬은 JPA 자동 반영, 배포 환경은 Flyway로 스키마 관리](./0002-manage-schema-with-jpa-and-flyway.md) | 채택 |
+| 0003 | [MADR과 adrs 및 OpenSpec으로 개발 문서를 관리한다](./0003-madr과-adrs-및-openspec으로-개발-문서를-관리한다.md) | 채택 |
 
 0001은 원문이 저장소에 없다. 번호는 재사용하지 않으며, 원문 복구와 결정 상태는 팀 확인 후 반영한다.
