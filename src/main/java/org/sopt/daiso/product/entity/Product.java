@@ -42,6 +42,26 @@ public class Product {
         return id;
     }
 
+    public String getProductNumber() {
+        return productNumber;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public int getReviewCount() {
+        return reviewCount;
+    }
+
     public boolean isLiked() {
         return liked;
     }
