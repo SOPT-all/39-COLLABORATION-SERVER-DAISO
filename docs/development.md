@@ -73,7 +73,7 @@ ADR 검사에서 ADR011은 [ADR 목록의 원문 누락 항목](adr/README.md#ad
 
 ## 현재 적용된 스키마 관리
 
-프로파일별 설정 파일을 기준으로 `local`은 JPA `update`·Flyway 비활성화, `prod`와 `migration`은 JPA `validate`·Flyway 활성화로 구성되어 있다. 초기 SQL은 `src/main/resources/db/migration/V1__create_initial_schema.sql`이며 `product`, `store`, `store_inventory`를 생성한다. 이 설정이 반영된 사실과 팀이 ADR을 채택했는지는 구분한다.
+프로파일별 설정 파일을 기준으로 `local`은 JPA `update`·Flyway 비활성화, `prod`와 `migration`은 JPA `validate`·Flyway 활성화로 구성되어 있다. 초기 SQL은 `src/main/resources/db/migration/V1__create_initial_schema.sql`이며 `product`, `store`, `store_inventory`를 생성한다. V2는 상품의 `image_url`을 NOT NULL로 변경한다. 매장 이미지와 재고 수량의 null 허용은 유지한다.
 
 아래 절차는 해당 설정에서 스키마를 변경하고 검증하는 방법이다. 선택 이유는 [ADR 0002](adr/0002-manage-schema-with-jpa-and-flyway.md)를 참고한다.
 
@@ -85,6 +85,8 @@ ADR 검사에서 ADR011은 [ADR 목록의 원문 누락 항목](adr/README.md#ad
 4. 배포 환경은 Flyway 적용 후 JPA `validate`로 매핑을 확인하며, 실패하면 배포 성공으로 처리하지 않는다.
 
 배포 스키마의 원본은 migration SQL이다. JPA `validate`는 테이블을 수정하지 않으며 모든 제약·데이터 변환을 보장하지 않으므로 SQL과 결과도 확인한다.
+
+V2 적용 전에는 기존 상품의 이미지 누락(null·빈 문자열)을 확인하고 실제 또는 제공받은 대체 이미지 URL을 먼저 채운다. 대체 이미지의 실제 URL은 데이터 준비 전에 제공받으며 migration에서 임의 URL을 넣거나 상품을 삭제하지 않는다. NOT NULL은 URL의 형식·접근 가능 여부를 검사하지 않으므로 유효한 URL의 준비는 데이터 적재 단계에서 확인한다. 개인 로컬의 JPA `update`만으로 기존 데이터 전환이 완료됐다고 판단하지 않는다.
 
 ### Migration 파일 규칙
 
@@ -107,7 +109,7 @@ macOS/zsh에서는 현재 명령에만 검증 DB 설정을 전달합니다.
 MIGRATION_DB_URL='jdbc:mysql://127.0.0.1:<검증 포트>/<검증 DB>?allowPublicKeyRetrieval=true&sslMode=DISABLED' \
 MIGRATION_DB_USER='<검증 계정>' \
 MIGRATION_DB_PASSWORD='<검증 비밀번호>' \
-./gradlew test --tests org.sopt.daiso.FlywayMigrationTests --tests org.sopt.daiso.store.StoreFavoriteIntegrationTest --tests org.sopt.daiso.product.ProductLikeIntegrationTest --rerun-tasks
+./gradlew test --tests org.sopt.daiso.FlywayMigrationTests --tests org.sopt.daiso.store.StoreFavoriteIntegrationTest --tests org.sopt.daiso.product.ProductLikeIntegrationTest --tests org.sopt.daiso.product.ProductListIntegrationTest --rerun-tasks
 ```
 
 Windows PowerShell:
@@ -116,10 +118,12 @@ Windows PowerShell:
 $env:MIGRATION_DB_URL='jdbc:mysql://127.0.0.1:<검증 포트>/<검증 DB>?allowPublicKeyRetrieval=true&sslMode=DISABLED'
 $env:MIGRATION_DB_USER='<검증 계정>'
 $env:MIGRATION_DB_PASSWORD='<검증 비밀번호>'
-./gradlew.bat test --tests org.sopt.daiso.FlywayMigrationTests --tests org.sopt.daiso.store.StoreFavoriteIntegrationTest --tests org.sopt.daiso.product.ProductLikeIntegrationTest --rerun-tasks
+./gradlew.bat test --tests org.sopt.daiso.FlywayMigrationTests --tests org.sopt.daiso.store.StoreFavoriteIntegrationTest --tests org.sopt.daiso.product.ProductLikeIntegrationTest --tests org.sopt.daiso.product.ProductListIntegrationTest --rerun-tasks
 ```
 
 `MIGRATION_DB_URL`이 없으면 해당 검증 테스트는 건너뜁니다. 테스트는 migration 이력, 테이블 생성, 자동 ID, nullable 재고, 외래키와 중복 방지를 확인합니다. Store·Product 매핑과 상태 저장 API는 각각 `StoreFavoriteIntegrationTest`·`ProductLikeIntegrationTest`에서 같은 migration 프로파일로 검증합니다. 별도 검증 DB 환경변수가 있어야 실행되며, HTTP 요청 후 커밋 결과·반복 요청·롤백·다른 컬럼 보존을 확인합니다.
+
+`FlywayMigrationTests`는 V2 적용 이력과 상품 이미지 null 거부도 확인합니다. `ProductListIntegrationTest`는 빈 검증 DB에 자체 상품 데이터를 준비해 전체·검색·정렬·특수문자·표시 경계값·저장된 이미지 URL 반환·좋아요 변경 후 재조회를 확인합니다. 위 전체 migration 검증과 별도로, 기존 V1 데이터의 이미지를 준비한 뒤 V2를 적용해 데이터 보존도 확인해야 합니다.
 
 ## 코드와 컨벤션
 

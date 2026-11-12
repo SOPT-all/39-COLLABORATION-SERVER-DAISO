@@ -1,13 +1,13 @@
-# Spec Delta
+# product-list Specification
 
 ## Purpose
 
 상품 전체 목록과 상품명·품번 검색 결과를 제공한다. 클라이언트가 추가 표시 변환 없이 사용할 수 있도록 상품 정보와 저장된 공유 좋아요 상태를 일관된 계약으로 반환한다.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: 상품 목록 조회
-시스템은 SHALL [상품 목록 계약](../../../../../docs/api/api-contract.md#6-상품-목록-조회)에 따라 조건에 맞는 모든 상품을 상품 ID 오름차순으로 반환한다.
+시스템은 SHALL [상품 목록 계약](../../../docs/api/api-contract.md#6-상품-목록-조회)에 따라 조건에 맞는 모든 상품을 상품 ID 오름차순으로 반환한다.
 
 #### Scenario: 전체 조회
 - **WHEN** 검색어를 생략하거나 빈 문자열 또는 공백만 전달한다
@@ -63,7 +63,7 @@
 - **THEN** 저장을 거부한다
 
 ### Requirement: 조회 실패 응답
-시스템은 SHALL 예상하지 못한 조회 실패에서 [공통 응답 계약](../../../../../docs/api/api-contract.md#23-공통-응답)의 서버 오류 응답을 반환하고 내부 정보를 노출하지 않는다.
+시스템은 SHALL 예상하지 못한 조회 실패에서 [공통 응답 계약](../../../docs/api/api-contract.md#23-공통-응답)의 서버 오류 응답을 반환하고 내부 정보를 노출하지 않는다.
 
 #### Scenario: 서버 내부 오류
 - **WHEN** 조회 처리 중 예상하지 못한 서버 오류가 발생한다

@@ -74,7 +74,7 @@
 | --- | --- | --- | --- | --- |
 | `PATCH` | `/stores/{storeId}/favorite` | [관심매장 찜](#4-관심매장-찜-설정-및-해제) | 김가영 | 구현됨 |
 | `GET` | `/products/{productId}/stores` | 상품 재고 조회 | 김가영 | 미구현 |
-| `GET` | `/products` | [상품 목록 조회](#6-상품-목록-조회) | 노성빈 | 미구현 |
+| `GET` | `/products` | [상품 목록 조회](#6-상품-목록-조회) | 노성빈 | 구현됨 |
 | `PATCH` | `/products/{productId}/like` | [상품 좋아요](#5-상품-좋아요-설정-및-해제) | 노성빈 | 구현됨 |
 
 기능 요구사항·시나리오는 [OpenSpec](../../openspec/AGENTS.md)에서 관리한다. 이 문서의 Draft API 목록은 구현 완료된 기능 명세가 아니다.
@@ -165,7 +165,7 @@ Content-Type: application/json
 
 ## 6. 상품 목록 조회
 
-[노션 계약](https://app.notion.com/p/41114af65e068053bb99e20f1f55899b)과 사용자 확인을 반영한 구현 예정 계약이며 현재 미구현이다. [변경 제안](../../openspec/changes/product-list/proposal.md)에서 범위를, [제안 시나리오](../../openspec/changes/product-list/specs/product-list/spec.md)에서 동작을 확인한다.
+[노션 계약](https://app.notion.com/p/41114af65e068053bb99e20f1f55899b)과 사용자 확인을 반영한 구현이다. [보관된 변경 제안](../../openspec/changes/archive/2026-11-13-product-list/proposal.md)에서 범위를, [현재 명세](../../openspec/specs/product-list/spec.md)에서 동작을 확인한다.
 
 - `GET /api/v1/products`, 담당자: 노성빈. 인증·사용자 ID·요청 본문은 사용하지 않는다.
 - 선택 쿼리 `keyword`(String)는 앞뒤 공백을 제거하고 상품명 부분 일치 또는 품번 정확 일치로 검색한다. 숫자로만 된 검색어에도 두 조건을 모두 적용하며 품번은 문자열로 비교한다. 생략·빈 문자열·공백이면 전체 조회한다. 앱의 빈 검색어 제출 무시와 API의 전체 조회는 구분한다.
@@ -176,7 +176,7 @@ Content-Type: application/json
 - price는 서버에서 천 단위 쉼표와 `원`을 포함해 반환한다. reviewCount는 9,999 이하에서 쉼표를 적용하고 9,999 초과일 때만 `9999+`로 반환한다. `개`는 붙이지 않는다.
 - NEW 배지는 프론트에서 정적으로 표시한다. 별점은 제외하며 두 항목의 서버 필드를 추가하지 않는다.
 
-현행 V1의 가격·리뷰 수는 INT 컬럼이다. 위 문자열은 API 응답의 표시 형식이며 DB 타입 변경을 뜻하지 않는다. 상품 좋아요에서 추가한 Product·Repository를 재사용할 예정이다. 현재 V1과 Product는 상품 이미지 null을 허용하므로 위 필수 계약은 아직 구현되지 않았다. 후속 migration과 기존 데이터의 전환 절차는 [변경 설계](../../openspec/changes/product-list/design.md#migration-plan)에서 관리한다.
+가격·리뷰 수의 DB 타입은 INT이며 위 문자열은 API 응답의 표시 형식이다. 상품 좋아요의 Product·Repository를 재사용한다. V1은 보존하고 V2와 Product 매핑으로 상품 이미지 NOT NULL을 적용한다. 기존 데이터의 URL 준비와 전환 절차는 [개발 가이드](../development.md#스키마-변경-절차)를 따른다.
 
 요청 예시:
 

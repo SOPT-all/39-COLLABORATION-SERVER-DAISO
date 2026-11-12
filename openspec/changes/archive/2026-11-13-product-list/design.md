@@ -4,9 +4,9 @@
 
 [제안](proposal.md)의 동기를 따른다. 기준은 머지된 dev(`24d699e`)와 좋아요 브랜치(`48b02d4`)다. `feat/12-product-list`는 후자에서 분기했으며 다른 미머지 브랜치의 코드·스키마는 전제하지 않는다.
 
-현재 Product에는 V1의 상품 컬럼 매핑과 좋아요용 메서드만 있고 목록 조회는 없다. V1과 엔티티는 상품 이미지 null을 허용하며 ProductLikeIntegrationTest와 FlywayMigrationTests에도 이미지가 없는 상품 데이터가 있다. 개인·공유 DB의 실제 데이터는 확인하지 않았다.
+제안 당시 Product에는 V1의 상품 컬럼 매핑과 좋아요용 메서드만 있고 목록 조회는 없다. V1과 엔티티는 상품 이미지 null을 허용하며 ProductLikeIntegrationTest와 FlywayMigrationTests에도 이미지가 없는 상품 데이터가 있다. 개인·공유 DB의 실제 데이터는 확인하지 않았다.
 
-HTTP 원본은 [API 계약](../../../docs/api/api-contract.md#6-상품-목록-조회), 동작은 [제안 명세](specs/product-list/spec.md)를 따른다. 계층·트랜잭션·검증은 [개발 가이드](../../../docs/development.md), 스키마 관리의 근거는 [ADR 0002](../../../docs/adr/0002-manage-schema-with-jpa-and-flyway.md)를 참고한다.
+HTTP 원본은 [API 계약](../../../../docs/api/api-contract.md#6-상품-목록-조회), 동작은 [제안 명세](specs/product-list/spec.md)를 따른다. 계층·트랜잭션·검증은 [개발 가이드](../../../../docs/development.md), 스키마 관리의 근거는 [ADR 0002](../../../../docs/adr/0002-manage-schema-with-jpa-and-flyway.md)를 참고한다.
 
 ## Goals / Non-Goals
 
@@ -34,7 +34,7 @@ HTTP 원본은 [API 계약](../../../docs/api/api-contract.md#6-상품-목록-�
 
 1. 개발 착수 전 최신 dev와 좋아요 PR 상태를 확인한다. 좋아요 머지 후에는 분기 기준 `48b02d4131eec268545997b6ea9287c3522edbd4` 이후의 목록 작업만 최신 dev 위로 옮긴다. 선행 작업을 추가로 이어받았다면 제외할 커밋 경계를 다시 확인한다. 목록 PR 대상은 dev로 한다.
 2. 적용 대상 DB의 상품 이미지 누락을 확인하고 사용자가 제공한 실제 또는 대체 이미지 URL을 채운다. 상품 삭제·임의 URL 생성·개인 DB 초기화를 전제로 하지 않는다. URL이 준비되지 않았다면 해당 DB의 필수 전환은 보류한다.
-3. 다음 가용 번호의 migration으로 `product.image_url`을 NOT NULL로 바꾸고 Product 매핑을 맞춘다. 현재 다음 번호는 V2지만 구현 시 최신 dev를 다시 확인한다. V1·매장 이미지·재고 컬럼은 변경하지 않는다.
+3. 다음 가용 번호의 migration으로 `product.image_url`을 NOT NULL로 바꾸고 Product 매핑을 맞춘다. 제안 당시 다음 번호는 V2였으며 구현 시 최신 dev를 다시 확인한다. V1·매장 이미지·재고 컬럼은 변경하지 않는다.
 4. 이미지가 빠진 기존 테스트 데이터를 보완한다. 빈 검증 DB와 V1 대표 데이터가 있는 검증 DB에서 순차 적용·데이터 보존·이미지 null 거부를 확인한다. 목록 조회와 기존 좋아요도 함께 검증한다.
 5. 애플리케이션을 되돌려도 기존 상품 데이터와 이미지 필수 제약은 유지할 수 있다. 제약 완화가 필요하면 별도 후속 migration으로 검토하며 공유된 SQL을 되돌려 수정하지 않는다.
 
