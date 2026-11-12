@@ -153,7 +153,8 @@ GET /api/v1/products/1001/stores?soldOut=false
 | data.stores[].imageUrl | String | 필수 매장 이미지 URL. 변경 ERD에 따라 null을 허용하지 않음 |
 | data.stores[].businessStatus | String | 저장된 영업 상태. 예: OPEN, CLOSED |
 | data.stores[].bookmarked | Boolean | 공유 매장 찜 상태. favorite와 같은 값 |
-| data.stores[].distanceMeters | BIGINT | 매장까지의 거리 |
+| data.stores[].distanceMeters | BIGINT | 원본 거리. 항상 미터 단위 |
+| data.stores[].distance | String | 표시용 거리. 1000m 미만은 m, 이상은 km. 소수 첫째 자리 반올림 및 불필요한 0 제거 |
 | data.stores[].stockQuantity | INT | 필수 재고 수량 |
 | data.stores[].pickupAvailable | Boolean | 픽업 지원 여부 |
 
@@ -173,6 +174,7 @@ GET /api/v1/products/1001/stores?soldOut=false
         "businessStatus": "OPEN",
         "bookmarked": true,
         "distanceMeters": 850,
+        "distance": "850m",
         "stockQuantity": 12,
         "pickupAvailable": false
       },
@@ -183,6 +185,7 @@ GET /api/v1/products/1001/stores?soldOut=false
         "businessStatus": "CLOSED",
         "bookmarked": false,
         "distanceMeters": 1500,
+        "distance": "1.5km",
         "stockQuantity": 0,
         "pickupAvailable": true
       }

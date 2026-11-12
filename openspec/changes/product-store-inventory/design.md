@@ -18,6 +18,8 @@
 - 재고 조회 Controller에 한정한 global advice로 연결·트랜잭션 시작 실패·타임아웃을 503으로 변환한다. 기존 찜 API의 500 계약은 유지한다.
 - ERD의 STRING은 VARCHAR(255)로 매핑한다. 이미지·재고 NULL은 사용자 지시에 따라 실패시킨다. V2는 ALTER TABLE만 사용하며 MySQL strict SQL mode에서 기존 NULL이 있으면 해당 ALTER를 실패시키고 자동 보정하지 않는다.
 
+- ProductStoreResponse의 표시용 getter에서 거리 문자열을 계산한다. 원본 distanceMeters와 DB 거리·JPQL 생성자는 유지하며 프론트는 distance를 그대로 표시한다. km는 BigDecimal로 소수 첫째 자리 HALF_UP 반올림하여 부동소수 오차를 피한다.
+
 ## Risks / Trade-offs
 
 - 기존 NULL은 배포를 중단한다 → 운영자가 실제 값을 보정한 후 재실행한다. 검증은 별도 MySQL에서 수행한다.

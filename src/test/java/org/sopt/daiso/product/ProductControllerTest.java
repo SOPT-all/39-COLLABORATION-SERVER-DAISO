@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.sopt.daiso.global.exception.CustomException;
 import org.sopt.daiso.global.exception.ErrorType;
 import org.sopt.daiso.global.exception.GlobalExceptionHandler;
@@ -45,7 +46,7 @@ class ProductControllerTest {
                         {"code":"SUCCESS","message":"상품의 매장별 재고가 조회되었습니다.",
                         "data":{"productId":1001,"stores":[{"storeId":201,"storeName":"강남본점",
                         "imageUrl":"https://example.com/store.png","businessStatus":"OPEN","bookmarked":true,
-                        "distanceMeters":850,"stockQuantity":12,"pickupAvailable":false}]}}
+                        "distanceMeters":850,"distance":"850m","stockQuantity":12,"pickupAvailable":false}]}}
                         """));
         verify(service).findStores(1001, true);
     }
@@ -118,6 +119,17 @@ class ProductControllerTest {
         assertFailure(500, "INTERNAL_SERVER_ERROR", "서버 내부 오류가 발생했습니다.");
     }
 
+    @ParameterizedTest
+    @CsvSource({"0, 0m", "850, 850m", "999, 999m", "1000, 1km", "1001, 1km",
+            "1500, 1.5km", "1549, 1.5km", "1550, 1.6km", "2000, 2km", "12500, 12.5km"})
+    void returnsDisplayDistanceAndPreservesMeters(long meters, String distance) throws Exception {
+        when(service.findStores(1001, true)).thenReturn(new ProductStoresResponse(1001L, List.of(
+                new ProductStoreResponse(201L, "매장", "store.png", "OPEN", false, meters, 1, false))));
+        mvc.perform(get("/api/v1/products/1001/stores"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.stores[0].distanceMeters").value(meters))
+                .andExpect(jsonPath("$.data.stores[0].distance").value(distance));
+    }
     private void assertFailure(int status, String code, String message) throws Exception {
         mvc.perform(get("/api/v1/products/1001/stores"))
                 .andExpect(status().is(status)).andExpect(jsonPath("$.code").value(code))

@@ -1,4 +1,4 @@
-﻿# Spec Delta
+# Spec Delta
 
 ## Purpose
 
@@ -24,6 +24,17 @@
 #### Scenario: 공유 찜 반영
 - **WHEN** 매장 찜을 변경한 후 재고를 조회한다
 - **THEN** bookmarked에 저장된 공유 찜 상태를 반환한다
+
+### Requirement: 거리 단위 표시
+시스템은 SHALL 원본 distanceMeters를 유지하고 화면 표시용 distance를 m 또는 km 문자열로 제공한다.
+
+#### Scenario: 1000미터 미만
+- **WHEN** 거리가 999미터 이하이다
+- **THEN** 미터 정수에 m을 붙여 반환한다
+
+#### Scenario: 킬로미터 전환
+- **WHEN** 거리가 1000미터 이상이다
+- **THEN** km로 변환해 소수 첫째 자리까지 반올림하고 불필요한 소수 0을 제거한다
 
 ### Requirement: 조회 오류 구분
 시스템은 SHALL 계약의 입력 오류·상품 없음·저장소 장애·서버 오류를 구분해 공통 실패 형식으로 반환한다.
