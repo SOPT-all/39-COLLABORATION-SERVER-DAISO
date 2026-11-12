@@ -1,0 +1,13 @@
+{
+  "name": "daiso-development-harness",
+  "private": true,
+  "scripts": {
+    "tools:setup": "python3 scripts/setup-tools.py",
+    "adr": "scripts/adrs",
+    "openspec": "openspec",
+    "harness:check": "python3 tests/check-harness.py"
+  },
+  "devDependencies": {
+    "@fission-ai/openspec": "1.14.3"
+  }
+}

@@ -7,3 +7,13 @@
 build
 docs
 *.log
+.tools
+node_modules
+.agents
+.codex
+openspec
+scripts
+package.json
+package-lock.json
+adrs.toml
+AGENTS.md

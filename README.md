@@ -5,39 +5,34 @@ PLAY SOPT 39기 합동 세미나 모바일 앱 1조 - 다이소
 
 Java 21과 실행 중인 Docker Desktop이 필요합니다. 프로젝트 루트에서 실행합니다.
 
-1. 프로젝트 루트에 `.env`를 만들고 `MYSQL_PORT`, `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_ROOT_PASSWORD`를 설정합니다. 로컬 포트는 `3307`, DB와 계정 이름은 `daiso`를 사용하고 두 비밀번호는 직접 지정합니다. `.env`는 Git에서 제외됩니다.
+1. `.env.example`을 `.env`로 복사하고 `MYSQL_PASSWORD`, `MYSQL_ROOT_PASSWORD`를 서로 다른 비밀번호로 채웁니다. 로컬 포트는 `3307`, DB와 계정 이름은 `daiso`가 기본값입니다. `.env`는 Git에서 제외됩니다. Compose와 Spring이 함께 읽으므로 `export`나 따옴표 없이 `KEY=value` 형식으로 작성합니다.
 2. `docker compose up -d --wait`로 MySQL 8.4를 실행합니다.
-3. PowerShell에서 `./gradlew.bat bootRun`으로 서버를 실행합니다.
+3. macOS 터미널에서 `./gradlew bootRun`, Windows PowerShell에서 `./gradlew.bat bootRun`으로 서버를 실행합니다.
    IntelliJ에서는 `DaisoApplication`을 실행하고 작업 디렉터리를 프로젝트 루트로 설정합니다. 기본 프로파일이 `local`이므로 Active profiles는 비워 두어도 됩니다.
 
-서버는 `localhost:8088`, MySQL은 `.env`의 `MYSQL_PORT=3307` 설정에 따라 `localhost:3307`을 사용합니다. MySQL 포트가 사용 중이면 `.env`의 `MYSQL_PORT`를 변경합니다. 로컬 프로필은 `.env`를 읽어 Compose와 같은 DB 계정을 사용합니다. 로컬은 JPA `update`로 테이블 변경을 자동 반영하며 Flyway는 실행하지 않습니다.
+서버는 `localhost:8088`, MySQL은 `.env`의 `MYSQL_PORT=3307` 설정에 따라 `localhost:3307`을 사용합니다. MySQL 포트가 사용 중이면 `.env`의 `MYSQL_PORT`를 변경합니다. 로컬 프로필은 `.env`를 읽어 Compose와 같은 DB 계정을 사용합니다. 프로파일별 설정과 변경 절차는 [개발 가이드](docs/development.md#현재-적용된-스키마-관리)를 참고합니다.
 
 - 상태 확인: `docker compose ps`
 - DB 접속: `docker compose exec mysql mysql -u daiso -p daiso` (계정·DB 이름을 변경했다면 해당 값 사용)
-- 테스트(PowerShell): `./gradlew.bat test`
 - 종료: `docker compose down` (데이터 볼륨은 유지됩니다.)
 
 비밀번호와 DB 이름은 볼륨을 처음 초기화할 때 적용됩니다. 기존 볼륨의 계정 정보는 `.env` 변경만으로 바뀌지 않습니다. 로컬 연결은 루프백 주소로 제한되며 TLS를 사용하지 않습니다.
 
-## DB 스키마 관리
+## macOS 실행 준비
 
-- `local`: JPA `update`, Flyway 비활성화
-- `prod`: Flyway migration 실행 후 JPA `validate`. 배포 DB 주소 설정은 기존 구성을 유지합니다.
-- `migration`: 개인 개발 DB와 분리된 검증 DB에서 Flyway와 JPA `validate` 실행
-- 초기 스키마: `src/main/resources/db/migration/V1__create_initial_schema.sql`
-- ERD의 `product`, `store`, `store_inventory` 테이블을 반영했습니다. ID는 자동 생성하며 상품·매장 재고 조합은 중복을 허용하지 않습니다. 그 외 ERD에 없는 기본값·상태값 제약·공통 컬럼은 추가하지 않았습니다.
-- 공유한 migration은 수정하지 않고 다음 버전 SQL을 추가합니다. 기준은 [ADR 0002](docs/adr/0002-manage-schema-with-jpa-and-flyway.md)를 따릅니다.
+Java 21과 Docker Desktop을 사용합니다. Gradle과 MySQL을 별도로 설치할 필요는 없습니다.
 
-검증 테스트는 별도의 버릴 수 있는 MySQL DB를 준비한 다음 PowerShell에서 실행합니다. 아래 값은 검증 DB 접속 정보로 바꿉니다. `.env`의 개발 DB를 대상으로 사용하지 않습니다.
-
-```powershell
-$env:MIGRATION_DB_URL='jdbc:mysql://127.0.0.1:<검증 포트>/<검증 DB>?allowPublicKeyRetrieval=true&sslMode=DISABLED'
-$env:MIGRATION_DB_USER='<검증 계정>'
-$env:MIGRATION_DB_PASSWORD='<검증 비밀번호>'
-./gradlew.bat test --tests org.sopt.daiso.FlywayMigrationTests --rerun-tasks
+```sh
+java -version
+# Java 21이 선택되지 않았다면 현재 터미널에서 설정합니다.
+export JAVA_HOME=$(/usr/libexec/java_home -v 21)
+export PATH="$JAVA_HOME/bin:$PATH"
+open -a Docker
 ```
 
-`MIGRATION_DB_URL`이 없으면 해당 검증 테스트는 건너뜁니다. 테스트는 migration 이력, 테이블 생성, 자동 ID, nullable 재고, 외래키와 중복 방지를 확인합니다. 엔티티 구현 전이므로 실제 엔티티 매핑 검증은 엔티티 추가 후 수행해야 합니다. 기존 테이블이 있는 공유·배포 DB는 자동 baseline하지 않으므로 최초 도입 절차를 별도로 확인합니다.
+Docker Desktop이 준비된 후 `docker info`가 성공하는지 확인합니다. 위 [로컬 MySQL 연결](#로컬-mysql-연결) 순서를 따르며, 환경 파일 복사는 `cp .env.example .env`로 수행합니다. 비밀번호를 채운 후 `docker compose config --quiet`로 설정을 확인하고 DB와 서버를 실행합니다.
+
+IntelliJ의 Project SDK와 Gradle JVM도 Java 21로 맞춥니다. Wrapper의 실행 권한은 Git에서 관리하며, 권한이 유지되지 않는 파일 시스템에서는 `bash ./gradlew bootRun`으로 실행할 수 있습니다.
 
 ## GitHub Actions
 
@@ -46,4 +41,12 @@ $env:MIGRATION_DB_PASSWORD='<검증 비밀번호>'
 - 서버의 `~/apps/daiso/.env`에 MySQL 설정을 준비합니다. 배포 시 기존 `docker-compose.yml`로 MySQL을 실행하고 Spring은 `docker run`으로 실행합니다.
 - 필요한 GitHub Secrets: `DEPLOY_HOST`, `DEPLOY_PORT`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS`, `GHCR_USERNAME`, `GHCR_PAT`.
 
-워크플로 파일을 GitHub에 push해야 실제 Actions 실행을 확인할 수 있습니다.
+CI의 JAR 빌드 성공은 DB 연결이나 Flyway migration 검증 성공을 의미하지 않습니다.
+
+## 개발 문서
+
+- [작업 지침](AGENTS.md): 공통 규칙과 작업별 문서 진입점
+- [개발 가이드](docs/development.md): 개발 절차, 검증 방법, 합의가 필요한 컨벤션
+- [API 계약](docs/api/api-contract.md): API 주소와 계약, 미정 사항
+- [ADR 목록](docs/adr/README.md): 설계 결정과 템플릿
+- [하네스 설치와 설정](docs/harness.md): MADR·adrs MCP·OpenSpec 설치·설정·연결 검증

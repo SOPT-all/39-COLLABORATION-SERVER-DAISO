@@ -1,0 +1,3 @@
+[mcp_servers.adrs]
+command = "sh"
+args = ["-c", "exec \"$(git rev-parse --show-toplevel)/scripts/adrs\" mcp serve"]

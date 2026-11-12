@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+binary="$project_dir/.tools/bin/adrs"
+if [ ! -x "$binary" ]; then
+  echo 'adrs가 없습니다. 프로젝트 루트에서 npm run tools:setup을 실행하세요.' >&2
+  exit 1
+fi
+cd "$project_dir"
+exec "$binary" "$@"
