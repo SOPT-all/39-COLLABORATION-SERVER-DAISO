@@ -1,0 +1,9 @@
+adr_dir = "docs/adr"
+mode = "ng"
+default_status = "proposed"
+no_edit = true
+
+[templates]
+format = "madr"
+variant = "full"
+custom = "docs/adr/template.md"
