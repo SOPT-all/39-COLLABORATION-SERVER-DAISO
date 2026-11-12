@@ -134,6 +134,38 @@ class StoreControllerTest {
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.code").value("INTERNAL_SERVER_ERROR"));
     }
+    @ParameterizedTest
+    @ValueSource(ints = {1048, 1364})
+    void returnsRequiredValueErrorForMissingDatabaseValues(int mysqlErrorCode) throws Exception {
+        when(service.changeFavorite(201, true)).thenThrow(new org.springframework.dao.DataIntegrityViolationException(
+                "private detail", new java.sql.SQLIntegrityConstraintViolationException("private column", "23000", mysqlErrorCode)));
+        mvc.perform(patch("/api/v1/stores/201/favorite").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"favorite\":true}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json("{\"code\":\"NULL_VALUE_NOT_ALLOWED\",\"message\":\"필수값은 null일 수 없습니다.\"}"))
+                .andExpect(jsonPath("$.data").doesNotExist());
+    }
+
+    @Test
+    void returnsRequiredValueErrorForJpaNullViolation() throws Exception {
+        when(service.changeFavorite(201, true)).thenThrow(new org.springframework.dao.DataIntegrityViolationException(
+                "private detail", new org.hibernate.PropertyValueException("private detail", "Store", "imageUrl")));
+        mvc.perform(patch("/api/v1/stores/201/favorite").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"favorite\":true}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("NULL_VALUE_NOT_ALLOWED"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1062, 1452})
+    void doesNotMisclassifyOtherConstraintsAsNull(int mysqlErrorCode) throws Exception {
+        when(service.changeFavorite(201, true)).thenThrow(new org.springframework.dao.DataIntegrityViolationException(
+                "private detail", new java.sql.SQLIntegrityConstraintViolationException("private detail", "23000", mysqlErrorCode)));
+        mvc.perform(patch("/api/v1/stores/201/favorite").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"favorite\":true}"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code").value("INTERNAL_SERVER_ERROR"));
+    }
     private void assertError(String body, String code, String message) throws Exception {
         mvc.perform(patch("/api/v1/stores/201/favorite").contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isBadRequest())

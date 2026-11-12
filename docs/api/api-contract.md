@@ -50,10 +50,11 @@
 {"code": "PRODUCT_NOT_FOUND", "message": "상품을 찾을 수 없습니다."}
 ```
 
-공통 프로토콜 오류도 `ErrorResponse` 형식으로 반환하며 기존 HTTP 상태와 응답 헤더를 유지한다.
+공통 오류도 `ErrorResponse` 형식으로 반환하며 기존 HTTP 상태와 응답 헤더를 유지한다. 저장 중 필수값 NULL은 JPA null 제약 오류 또는 MySQL 1048·1364에 한해 아래 400으로 처리한다. 다른 데이터 제약 오류와 수동 SQL·migration 실행 오류에는 이 매핑을 적용하지 않는다.
 
 | 상황 | HTTP 상태 | code | message |
 | --- | --- | --- | --- |
+| JPA/MySQL 저장 중 필수값 NULL 또는 필수값 누락 | 400 | NULL_VALUE_NOT_ALLOWED | 필수값은 null일 수 없습니다. |
 | 지원하지 않는 HTTP 메서드 | 405 | METHOD_NOT_ALLOWED | 지원하지 않는 HTTP 메서드입니다. |
 | 지원하지 않는 Content-Type | 415 | UNSUPPORTED_MEDIA_TYPE | 지원하지 않는 Content-Type입니다. |
 
