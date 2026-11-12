@@ -31,7 +31,7 @@
 
 ### 2.3 공통 응답
 
-[팀 공통 응답·예외 처리 컨벤션](https://app.notion.com/p/5c214af65e0682afbfc101d6a2c4a04d)을 반영한 구현 기준이다. 아직 공통 응답·예외 처리 클래스는 구현되지 않았다. 예외 처리 책임은 [개발 가이드](../development.md#계층공통-예외-처리)에서 관리한다.
+[팀 공통 응답·예외 처리 컨벤션](https://app.notion.com/p/5c214af65e0682afbfc101d6a2c4a04d)을 반영한 구현 기준이다. 공통 응답·예외 처리 클래스는 global 패키지에 구현되어 있다. 예외 처리 책임은 [개발 가이드](../development.md#계층공통-예외-처리)에서 관리한다.
 
 - 성공 응답은 `ApiResponse<T>`로 `code`, `message`, `data`를 제공한다. 성공 코드는 `SUCCESS`이며 data는 응답 데이터가 없으면 null을 허용한다.
 - 실패 응답은 `ErrorResponse`로 `code`, `message`만 제공한다. `data` 필드는 포함하지 않는다.
@@ -71,6 +71,54 @@
 | `PATCH` | `/products/{productId}/like` | 상품 좋아요 | 노성빈 |
 
 기능 요구사항·시나리오는 [OpenSpec](../../openspec/AGENTS.md)에서 관리한다. 이 문서의 Draft API 목록은 구현 완료된 기능 명세가 아니다.
+
+## 4. 관심매장 찜 설정 및 해제
+
+- 담당자: 김가영
+- `PATCH /api/v1/stores/{storeId}/favorite`
+- 인증·사용자 ID 없음. 매장별 공유 상태이며 같은 값의 반복 요청은 상태를 유지한다.
+- 요청 헤더: `Content-Type: application/json`
+- 경로 `storeId`: 필수 BIGINT. `1` 이상 `9223372036854775807` 이하 정수.
+- JSON 객체의 `favorite`: 필수 boolean. `true`는 설정, `false`는 해제. 누락과 null은 허용하지 않는다.
+- 동작 시나리오: [store-favorite 변경 명세](../../openspec/changes/store-favorite/specs/store-favorite/spec.md).
+
+요청 예시:
+
+```http
+PATCH /api/v1/stores/201/favorite
+Content-Type: application/json
+```
+
+```json
+{"favorite": true}
+```
+
+해제 요청은 `{"favorite": false}`다.
+
+성공 응답: `200 OK`. `data.storeId`는 BIGINT, `data.favorite`는 저장된 boolean 상태다.
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "매장 찜 상태를 저장했습니다.",
+  "data": {"storeId": 201, "favorite": true}
+}
+```
+
+실패 응답은 `code`, `message`만 포함한다. 거부한 요청에서는 기존 상태를 변경하지 않는다.
+
+| 상황 | HTTP 상태 | code | message |
+| --- | --- | --- | --- |
+| 본문 또는 favorite 누락, favorite가 null | 400 | FAVORITE_REQUIRED | 찜 상태는 필수입니다. |
+| favorite가 불리언이 아님 | 400 | INVALID_FAVORITE_TYPE | 찜 상태는 true 또는 false여야 합니다. |
+| 잘못된 JSON 또는 객체가 아닌 본문 | 400 | INVALID_REQUEST | 요청 본문이 올바르지 않습니다. |
+| 매장 ID 형식 오류 또는 양의 int64 범위 밖 | 400 | INVALID_STORE_ID | 유효하지 않은 매장 ID입니다. |
+| 유효한 ID에 해당하는 매장 없음 | 404 | STORE_NOT_FOUND | 매장을 찾을 수 없습니다. |
+| 서버 내부 오류 | 500 | INTERNAL_SERVER_ERROR | 서버 내부 오류가 발생했습니다. |
+
+```json
+{"code": "FAVORITE_REQUIRED", "message": "찜 상태는 필수입니다."}
+```
 
 ## 문서 작성 기준
 

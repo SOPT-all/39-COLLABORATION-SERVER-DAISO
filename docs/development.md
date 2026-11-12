@@ -107,7 +107,7 @@ macOS/zsh에서는 현재 명령에만 검증 DB 설정을 전달합니다.
 MIGRATION_DB_URL='jdbc:mysql://127.0.0.1:<검증 포트>/<검증 DB>?allowPublicKeyRetrieval=true&sslMode=DISABLED' \
 MIGRATION_DB_USER='<검증 계정>' \
 MIGRATION_DB_PASSWORD='<검증 비밀번호>' \
-./gradlew test --tests org.sopt.daiso.FlywayMigrationTests --rerun-tasks
+./gradlew test --tests org.sopt.daiso.FlywayMigrationTests --tests org.sopt.daiso.store.StoreFavoriteIntegrationTest --rerun-tasks
 ```
 
 Windows PowerShell:
@@ -116,10 +116,10 @@ Windows PowerShell:
 $env:MIGRATION_DB_URL='jdbc:mysql://127.0.0.1:<검증 포트>/<검증 DB>?allowPublicKeyRetrieval=true&sslMode=DISABLED'
 $env:MIGRATION_DB_USER='<검증 계정>'
 $env:MIGRATION_DB_PASSWORD='<검증 비밀번호>'
-./gradlew.bat test --tests org.sopt.daiso.FlywayMigrationTests --rerun-tasks
+./gradlew.bat test --tests org.sopt.daiso.FlywayMigrationTests --tests org.sopt.daiso.store.StoreFavoriteIntegrationTest --rerun-tasks
 ```
 
-`MIGRATION_DB_URL`이 없으면 해당 검증 테스트는 건너뜁니다. 테스트는 migration 이력, 테이블 생성, 자동 ID, nullable 재고, 외래키와 중복 방지를 확인합니다. 엔티티 구현 전이므로 실제 엔티티 매핑 검증은 엔티티 추가 후 수행해야 합니다.
+`MIGRATION_DB_URL`이 없으면 해당 검증 테스트는 건너뜁니다. 테스트는 migration 이력, 테이블 생성, 자동 ID, nullable 재고, 외래키와 중복 방지를 확인합니다. Store 엔티티 매핑과 찜 API는 `StoreFavoriteIntegrationTest`에서 같은 migration 프로파일로 검증합니다. 별도 검증 DB 환경변수가 있어야 실행되며, 실제 HTTP 요청 후 커밋 결과·반복 요청·롤백·다른 컬럼 보존을 확인합니다.
 
 ## 코드와 컨벤션
 
