@@ -7,6 +7,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -26,6 +28,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         ErrorType code = ErrorType.INVALID_REQUEST;
         return ResponseEntity.status(code.getStatus()).body(new ErrorResponse(code.getCode(), code.getMessage()));
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(
+            HttpRequestMethodNotSupportedException exception,
+            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        ErrorType type = ErrorType.METHOD_NOT_ALLOWED;
+        return new ResponseEntity<>(new ErrorResponse(type.getCode(), type.getMessage()), headers, status);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(
+            HttpMediaTypeNotSupportedException exception,
+            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        ErrorType type = ErrorType.UNSUPPORTED_MEDIA_TYPE;
+        return new ResponseEntity<>(new ErrorResponse(type.getCode(), type.getMessage()), headers, status);
     }
 
     @ExceptionHandler(Exception.class)

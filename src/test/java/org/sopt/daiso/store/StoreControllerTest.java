@@ -103,13 +103,25 @@ class StoreControllerTest {
     }
 
     @Test
-    void preservesFrameworkHttpErrors() throws Exception {
+    void returnsCommonErrorsAndPreservesFrameworkHeaders() throws Exception {
         mvc.perform(patch("/api/v1/stores/201/favorite").contentType(MediaType.TEXT_PLAIN)
                         .content("favorite=true"))
-                .andExpect(status().isUnsupportedMediaType());
+                .andExpect(status().isUnsupportedMediaType())
+                .andExpect(header().string("Accept", org.hamcrest.Matchers.containsString("application/json")))
+                .andExpect(jsonPath("$.code").value("UNSUPPORTED_MEDIA_TYPE"))
+                .andExpect(jsonPath("$.message").value("지원하지 않는 Content-Type입니다."))
+                .andExpect(jsonPath("$.data").doesNotExist())
+                .andExpect(jsonPath("$.type").doesNotExist())
+                .andExpect(jsonPath("$.status").doesNotExist());
         mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
                         .get("/api/v1/stores/201/favorite"))
-                .andExpect(status().isMethodNotAllowed());
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(header().string("Allow", org.hamcrest.Matchers.containsString("PATCH")))
+                .andExpect(jsonPath("$.code").value("METHOD_NOT_ALLOWED"))
+                .andExpect(jsonPath("$.message").value("지원하지 않는 HTTP 메서드입니다."))
+                .andExpect(jsonPath("$.data").doesNotExist())
+                .andExpect(jsonPath("$.type").doesNotExist())
+                .andExpect(jsonPath("$.status").doesNotExist());
         verifyNoInteractions(service);
     }
     private void assertError(String body, String code, String message) throws Exception {

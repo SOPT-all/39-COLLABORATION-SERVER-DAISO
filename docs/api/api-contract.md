@@ -50,6 +50,13 @@
 {"code": "PRODUCT_NOT_FOUND", "message": "상품을 찾을 수 없습니다."}
 ```
 
+공통 프로토콜 오류도 `ErrorResponse` 형식으로 반환하며 기존 HTTP 상태와 응답 헤더를 유지한다.
+
+| 상황 | HTTP 상태 | code | message |
+| --- | --- | --- | --- |
+| 지원하지 않는 HTTP 메서드 | 405 | METHOD_NOT_ALLOWED | 지원하지 않는 HTTP 메서드입니다. |
+| 지원하지 않는 Content-Type | 415 | UNSUPPORTED_MEDIA_TYPE | 지원하지 않는 Content-Type입니다. |
+
 ### 2.4 상품 좋아요·매장 찜
 
 - 상품 좋아요와 매장 찜은 사용자별로 나누지 않는 공유 상태다. 모든 사용자가 같은 상품·매장의 저장된 상태를 확인한다. 사용자 ID나 사용자별 저장 관계를 추가하지 않는다.
