@@ -7,7 +7,7 @@
 ## ADDED Requirements
 
 ### Requirement: 상품별 매장 재고 조회
-시스템은 SHALL [API 계약](../../../../../docs/api/api-contract.md)의 상품별 매장 재고 조회 응답을 제공한다.
+시스템은 SHALL [API 계약](../../../../../../docs/api/api-contract.md)의 상품별 매장 재고 조회 응답을 제공한다.
 
 #### Scenario: 기본 품절 제외
 - **WHEN** soldOut을 생략하거나 true로 조회한다
