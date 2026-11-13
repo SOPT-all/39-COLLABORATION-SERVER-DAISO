@@ -5,7 +5,7 @@ PLAY SOPT 39기 합동 세미나 모바일 앱 1조 - 다이소
 
 Java 21과 실행 중인 Docker Desktop이 필요합니다. 프로젝트 루트에서 실행합니다.
 
-1. `.env.example`을 `.env`로 복사하고 `MYSQL_PASSWORD`, `MYSQL_ROOT_PASSWORD`를 서로 다른 비밀번호로 채웁니다. 로컬 포트는 `3307`, DB와 계정 이름은 `daiso`가 기본값입니다. `.env`는 Git에서 제외됩니다. Compose와 Spring이 함께 읽으므로 `export`나 따옴표 없이 `KEY=value` 형식으로 작성합니다.
+1. 팀에서 개인적으로 전달받은 `.env`를 프로젝트 루트에 둡니다. 환경 예제 파일은 저장소에서 관리하지 않습니다. 로컬 포트는 `3307`, DB와 계정 이름은 `daiso`가 기본값입니다. `.env`는 Git에서 제외됩니다. Compose와 Spring이 함께 읽으므로 `export`나 따옴표 없이 `KEY=value` 형식으로 작성합니다.
 2. `docker compose up -d --wait`로 MySQL 8.4를 실행합니다.
 3. macOS 터미널에서 `./gradlew bootRun`, Windows PowerShell에서 `./gradlew.bat bootRun`으로 서버를 실행합니다.
    IntelliJ에서는 `DaisoApplication`을 실행하고 작업 디렉터리를 프로젝트 루트로 설정합니다. 기본 프로파일이 `local`이므로 Active profiles는 비워 두어도 됩니다.
@@ -30,7 +30,7 @@ export PATH="$JAVA_HOME/bin:$PATH"
 open -a Docker
 ```
 
-Docker Desktop이 준비된 후 `docker info`가 성공하는지 확인합니다. 위 [로컬 MySQL 연결](#로컬-mysql-연결) 순서를 따르며, 환경 파일 복사는 `cp .env.example .env`로 수행합니다. 비밀번호를 채운 후 `docker compose config --quiet`로 설정을 확인하고 DB와 서버를 실행합니다.
+Docker Desktop이 준비된 후 `docker info`가 성공하는지 확인합니다. 위 [로컬 MySQL 연결](#로컬-mysql-연결) 순서에 따라 `.env`를 준비한 후 `docker compose config --quiet`로 설정을 확인하고 DB와 서버를 실행합니다.
 
 IntelliJ의 Project SDK와 Gradle JVM도 Java 21로 맞춥니다. Wrapper의 실행 권한은 Git에서 관리하며, 권한이 유지되지 않는 파일 시스템에서는 `bash ./gradlew bootRun`으로 실행할 수 있습니다.
 

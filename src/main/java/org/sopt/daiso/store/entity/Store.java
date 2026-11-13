@@ -2,15 +2,11 @@ package org.sopt.daiso.store.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "store")
@@ -23,13 +19,11 @@ public class Store {
     @Column(nullable = false, length = 255)
     private String name;
 
-    @Column(name = "image_url", nullable = false, length = 2048)
+    @Column(name = "image_url", length = 2048)
     private String imageUrl;
 
-    @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "business_status", nullable = false, length = 30)
-    private BusinessStatus businessStatus;
+    private String businessStatus;
 
     @Column(name = "is_favorite", nullable = false)
     private boolean favorite;

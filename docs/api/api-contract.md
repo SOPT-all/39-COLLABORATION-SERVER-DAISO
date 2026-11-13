@@ -5,7 +5,7 @@
 > 정본 위치: `docs/api/api-contract.md`
 > 기준: [팀 API 명세서](https://app.notion.com/p/API-65614af65e0683fc8032815fa74f5650?source=copy_link) — 상세 API 확인 및 팀 확정 정책 반영. 구현 완료를 뜻하지 않음
 > 버전: v0.1
-> 최종 수정: 2026-11-12
+> 최종 수정: 2026-11-13
 
 ## 1. 목적
 
@@ -50,11 +50,10 @@
 {"code": "PRODUCT_NOT_FOUND", "message": "상품을 찾을 수 없습니다."}
 ```
 
-공통 오류도 `ErrorResponse` 형식으로 반환하며 기존 HTTP 상태와 응답 헤더를 유지한다. 저장 중 필수값 NULL은 JPA null 제약 오류 또는 MySQL 1048·1364에 한해 아래 400으로 처리한다. 다른 데이터 제약 오류와 수동 SQL·migration 실행 오류에는 이 매핑을 적용하지 않는다.
+공통 프로토콜 오류도 `ErrorResponse` 형식으로 반환하며 기존 HTTP 상태와 응답 헤더를 유지한다.
 
 | 상황 | HTTP 상태 | code | message |
 | --- | --- | --- | --- |
-| JPA/MySQL 저장 중 필수값 NULL 또는 필수값 누락 | 400 | NULL_VALUE_NOT_ALLOWED | 필수값은 null일 수 없습니다. |
 | 지원하지 않는 HTTP 메서드 | 405 | METHOD_NOT_ALLOWED | 지원하지 않는 HTTP 메서드입니다. |
 | 지원하지 않는 Content-Type | 415 | UNSUPPORTED_MEDIA_TYPE | 지원하지 않는 Content-Type입니다. |
 
@@ -71,12 +70,12 @@
 - 아래 Path는 공통 접두사 `/api/v1`을 제외한 경로다.
 - API 주소 수: `4`
 
-| Method | Path | 설명 | 담당자 |
-| --- | --- | --- | --- |
-| `PATCH` | `/stores/{storeId}/favorite` | 관심매장 찜 | 김가영 |
-| `GET` | `/products/{productId}/stores` | 상품 재고 조회 | 김가영 |
-| `GET` | `/products` | 상품 목록 조회 | 노성빈 |
-| `PATCH` | `/products/{productId}/like` | 상품 좋아요 | 노성빈 |
+| Method | Path | 설명 | 담당자 | 코드 구현 상태 |
+| --- | --- | --- | --- | --- |
+| `PATCH` | `/stores/{storeId}/favorite` | [관심매장 찜](#4-관심매장-찜-설정-및-해제) | 김가영 | 구현됨 |
+| `GET` | `/products/{productId}/stores` | 상품 재고 조회 | 김가영 | 미구현 |
+| `GET` | `/products` | [상품 목록 조회](#6-상품-목록-조회) | 노성빈 | 구현됨 |
+| `PATCH` | `/products/{productId}/like` | [상품 좋아요](#5-상품-좋아요-설정-및-해제) | 노성빈 | 구현됨 |
 
 기능 요구사항·시나리오는 [OpenSpec](../../openspec/AGENTS.md)에서 관리한다. 이 문서의 Draft API 목록은 구현 완료된 기능 명세가 아니다.
 
@@ -88,7 +87,7 @@
 - 요청 헤더: `Content-Type: application/json`
 - 경로 `storeId`: 필수 BIGINT. `1` 이상 `9223372036854775807` 이하 정수.
 - JSON 객체의 `favorite`: 필수 boolean. `true`는 설정, `false`는 해제. 누락과 null은 허용하지 않는다.
-- 동작 시나리오: [store-favorite 변경 명세](../../openspec/changes/store-favorite/specs/store-favorite/spec.md).
+- 동작 시나리오: [store-favorite 현재 명세](../../openspec/specs/store-favorite/spec.md).
 
 요청 예시:
 
@@ -128,82 +127,90 @@ Content-Type: application/json
 {"code": "FAVORITE_REQUIRED", "message": "찜 상태는 필수입니다."}
 ```
 
-## 5. 상품별 매장 재고 조회
+## 5. 상품 좋아요 설정 및 해제
 
-- 담당자: 김가영
-- `GET /api/v1/products/{productId}/stores`
-- 인증·사용자 ID 및 요청 본문 없음.
-- 경로 `productId`: 필수 BIGINT. `1` 이상 `9223372036854775807` 이하 정수.
-- 쿼리 `soldOut`: 선택 boolean. 생략 시 `true`. `true`는 재고 1 이상만 조회하고, `false`는 품절 필터를 적용하지 않는다.
-- `soldOut`은 소문자 `true`·`false`만 허용하며 빈 값·숫자·중복 입력은 400이다.
-- 재고 관계가 없는 매장은 반환하지 않는다. 상품이 존재하되 조건에 맞는 결과가 없으면 200과 `stores: []`를 반환한다.
-- 정렬·페이지네이션은 정의하지 않는다.
-- 동작 시나리오: [상품 재고 조회 변경 명세](../../openspec/changes/product-store-inventory/specs/product-store-inventory/spec.md).
+노션의 [상품 좋아요 계약](https://app.notion.com/p/41114af65e068099b5d9fb71ea42fbd9)을 반영한 구현이다. [현재 명세](../../openspec/specs/product-like/spec.md)에서 동작 시나리오를, [보관된 변경 제안](../../openspec/changes/archive/2026-11-13-product-like/proposal.md)에서 구현 범위를 확인한다.
 
-```http
-GET /api/v1/products/1001/stores
-GET /api/v1/products/1001/stores?soldOut=false
+- 담당자: 노성빈
+- `PATCH /api/v1/products/{productId}/like`
+- 요청 헤더: `Content-Type: application/json`
+- `productId`: 필수 정수. `1` 이상 `9223372036854775807` 이하.
+- JSON 객체의 `liked`: 필수 boolean. 누락·null·문자열·숫자·객체·배열은 허용하지 않는다.
+- 인증·공유 상태·값 저장 기준은 [공통 정책](#24-상품-좋아요매장-찜)을 따른다.
+
+요청 예시:
+
+```json
+{"liked": true}
 ```
 
-| 응답 필드 | 타입 | 설명 |
-| --- | --- | --- |
-| data.productId | BIGINT | 상품 ID |
-| data.stores | Array<Object> | 조건에 맞는 매장 재고 목록 |
-| data.stores[].storeId | BIGINT | 매장 고유 ID |
-| data.stores[].storeName | String | 매장명 |
-| data.stores[].imageUrl | String | 필수 매장 이미지 URL. 변경 ERD에 따라 null을 허용하지 않음 |
-| data.stores[].businessStatus | Enum(String) | 직접 저장한 영업 상태. OPEN: 영업중, CLOSED: 영업 전. 시간 기반 자동 계산 없음 |
-| data.stores[].bookmarked | Boolean | 공유 매장 찜 상태. favorite와 같은 값 |
-| data.stores[].distanceMeters | BIGINT | 원본 거리. 항상 미터 단위 |
-| data.stores[].distance | String | 표시용 거리. 1000m 미만은 m, 이상은 km. 소수 첫째 자리 반올림 및 불필요한 0 제거 |
-| data.stores[].stockQuantity | INT | 필수 재고 수량. 0은 품절이며 프론트에서 품절 표시 |
-| data.stores[].pickupAvailable | Boolean | true: 픽업 지원, false: 픽업 미지원. 재고 유무와 독립 |
-
-성공 응답: `200 OK`, 아래는 `soldOut=false` 예시다. 사용자 지시에 따라 이미지 NULL 예시 대신 변경 ERD의 NOT NULL을 적용한다.
+성공 응답: `200 OK`. `data.productId`는 BIGINT, `data.liked`는 저장된 boolean 상태다.
 
 ```json
 {
   "code": "SUCCESS",
-  "message": "상품의 매장별 재고가 조회되었습니다.",
+  "message": "상품 좋아요 상태를 저장했습니다.",
+  "data": {"productId": 1001, "liked": true}
+}
+```
+
+| 상황 | HTTP 상태 | code | message |
+| --- | --- | --- | --- |
+| 상품 ID 형식 오류 또는 양의 int64 범위 밖 | 400 | INVALID_PRODUCT_ID | 유효하지 않은 상품 ID입니다. |
+| 본문·liked 누락, null, 불리언이 아닌 값, 잘못된 JSON 또는 객체가 아닌 본문 | 400 | INVALID_REQUEST | 요청 본문이 올바르지 않습니다. |
+| 유효한 ID에 해당하는 상품 없음 | 404 | PRODUCT_NOT_FOUND | 상품을 찾을 수 없습니다. |
+| 서버 내부 오류 | 500 | INTERNAL_SERVER_ERROR | 서버 내부 오류가 발생했습니다. |
+
+응답 형식과 405·415 처리는 [공통 응답](#23-공통-응답)을 따른다. 본문 오류는 매장 찜 전용 오류 코드와 구분하여 위 계약을 적용한다.
+
+## 6. 상품 목록 조회
+
+[노션 계약](https://app.notion.com/p/41114af65e068053bb99e20f1f55899b)과 사용자 확인을 반영한 구현이다. [보관된 변경 제안](../../openspec/changes/archive/2026-11-13-product-list/proposal.md)에서 범위를, [현재 명세](../../openspec/specs/product-list/spec.md)에서 동작을 확인한다.
+
+- `GET /api/v1/products`, 담당자: 노성빈. 인증·사용자 ID·요청 본문은 사용하지 않는다.
+- 선택 쿼리 `keyword`(String)는 앞뒤 공백을 제거하고 상품명 부분 일치 또는 품번 정확 일치로 검색한다. 숫자로만 된 검색어에도 두 조건을 모두 적용하며 품번은 문자열로 비교한다. 생략·빈 문자열·공백이면 전체 조회한다. 앱의 빈 검색어 제출 무시와 API의 전체 조회는 구분한다.
+- 검색어의 `%`, `_`는 검색 범위를 넓히는 와일드카드가 아닌 일반 문자로 취급한다. 영문 대소문자 비교는 DB의 collation을 따르며 별도 검색 규칙을 추가하지 않는다. URL 예약 문자는 클라이언트가 인코딩해 전달한다.
+- 페이지네이션 없이 조건에 맞는 모든 상품을 ID 오름차순으로 반환한다. 별도 정렬·필터 옵션을 추가하지 않는다.
+- 성공은 `200`, 메시지는 `상품 목록을 조회했습니다.`이며 `data.products` 배열에 productId(BIGINT), productNumber·name·price·imageUrl·reviewCount(String), liked(boolean)를 담는다. 결과가 없으면 빈 배열이다.
+- 응답 항목은 null을 허용하지 않는다. imageUrl에는 실제 상품 이미지 또는 사용자가 준비한 “이미지 없음” 이미지의 URL을 저장하고 그대로 반환한다. API에서 임의의 기본 URL을 생성하거나 null·빈 문자열로 대체하지 않는다. liked는 [공통 정책](#24-상품-좋아요매장-찜)에 따른 저장값이다.
+- price는 서버에서 천 단위 쉼표와 `원`을 포함해 반환한다. reviewCount는 9,999 이하에서 쉼표를 적용하고 9,999 초과일 때만 `9999+`로 반환한다. `개`는 붙이지 않는다.
+- NEW 배지는 프론트에서 정적으로 표시한다. 별점은 제외하며 두 항목의 서버 필드를 추가하지 않는다.
+
+가격·리뷰 수의 DB 타입은 INT이며 위 문자열은 API 응답의 표시 형식이다. 상품 좋아요의 Product·Repository를 재사용한다. V1은 보존하고 V2와 Product 매핑으로 상품 이미지 NOT NULL을 적용한다. 기존 데이터의 URL 준비와 전환 절차는 [개발 가이드](../development.md#스키마-변경-절차)를 따른다.
+
+요청 예시:
+
+```http
+GET /api/v1/products
+GET /api/v1/products?keyword=마스크팩
+```
+
+| 값 | price 응답 | reviewCount 응답 |
+| --- | --- | --- |
+| 0 | `"0원"` | `"0"` |
+| 1000 | `"1,000원"` | `"1,000"` |
+| 9999 | `"9,999원"` | `"9,999"` |
+| 10000 | `"10,000원"` | `"9999+"` |
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "상품 목록을 조회했습니다.",
   "data": {
-    "productId": 1001,
-    "stores": [
-      {
-        "storeId": 201,
-        "storeName": "강남본점",
-        "imageUrl": "https://example.com/stores/201.png",
-        "businessStatus": "OPEN",
-        "bookmarked": true,
-        "distanceMeters": 850,
-        "distance": "850m",
-        "stockQuantity": 12,
-        "pickupAvailable": false
-      },
-      {
-        "storeId": 202,
-        "storeName": "역삼점",
-        "imageUrl": "https://example.com/stores/202.png",
-        "businessStatus": "CLOSED",
-        "bookmarked": false,
-        "distanceMeters": 1500,
-        "distance": "1.5km",
-        "stockQuantity": 0,
-        "pickupAvailable": true
-      }
-    ]
+    "products": [{
+      "productId": 1001,
+      "productNumber": "1023456",
+      "name": "수분 마스크팩",
+      "price": "1,000원",
+      "imageUrl": "https://example.com/product.png",
+      "reviewCount": "12",
+      "liked": false
+    }]
   }
 }
 ```
 
-실패 응답은 공통 `code`, `message` 형식을 따른다. 저장소 연결·트랜잭션 시작 실패·조회 타임아웃은 이 조회 API에서 503으로 처리하고, 예상하지 못한 오류는 500으로 처리한다.
-
-| 상황 | HTTP 상태 | code | message |
-| --- | --- | --- | --- |
-| 상품 ID 형식·범위 오류 | 400 | INVALID_PRODUCT_ID | 유효하지 않은 상품 ID입니다. |
-| 잘못된 soldOut | 400 | INVALID_EXCLUDE_SOLD_OUT | 품절 제외 여부는 true 또는 false여야 합니다. |
-| 상품 없음 | 404 | PRODUCT_NOT_FOUND | 상품을 찾을 수 없습니다. |
-| 서버 내부 오류 | 500 | INTERNAL_SERVER_ERROR | 서버 내부 오류가 발생했습니다. |
-| 저장소 장애 | 503 | STORAGE_UNAVAILABLE | 일시적으로 매장별 재고를 조회할 수 없습니다. 잠시 후 다시 시도해 주세요. |
+실패는 공통 오류 응답을 사용한다. 서버 내부 오류는 `500`, `INTERNAL_SERVER_ERROR`, `서버 내부 오류가 발생했습니다.`다.
 
 ## 문서 작성 기준
 

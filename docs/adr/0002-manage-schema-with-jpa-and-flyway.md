@@ -1,7 +1,7 @@
 ---
 number: 2
 title: 0002. 로컬은 JPA 자동 반영, 배포 환경은 Flyway로 스키마 관리
-status: proposed
+status: accepted
 date: 2026-11-12
 ---
 
@@ -29,7 +29,7 @@ date: 2026-11-12
 | 별도 migration 검증 DB | `validate` | 활성화 | SQL 적용 및 엔티티와 스키마의 일치 여부 확인 |
 | 배포 환경 | `validate` | 활성화 | 버전이 있는 SQL로 스키마를 변경하고 매핑 검증 |
 
-현재 개발 절차와 migration 파일 규칙은 [개발 가이드](../development.md#스키마-변경-절차)에서 관리한다. 이 문서는 해당 방식을 선택한 배경·대안·영향을 기록한다. 팀 합의 전까지 상태는 `제안`으로 유지한다.
+현재 개발 절차와 migration 파일 규칙은 [개발 가이드](../development.md#스키마-변경-절차)에서 관리한다. 이 문서는 해당 방식을 선택한 배경·대안·영향을 기록한다.
 
 ### Consequences
 

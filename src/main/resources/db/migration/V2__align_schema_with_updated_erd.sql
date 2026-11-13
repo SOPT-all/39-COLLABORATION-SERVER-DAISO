@@ -1,5 +1,0 @@
-ALTER TABLE store
-    MODIFY COLUMN image_url VARCHAR(2048) NOT NULL;
-
-ALTER TABLE store_inventory
-    MODIFY COLUMN stock_quantity INT NOT NULL;
