@@ -73,3 +73,6 @@ out/
 # Development harness generated files
 .tools/
 node_modules/
+
+# Python validation helpers
+__pycache__/
