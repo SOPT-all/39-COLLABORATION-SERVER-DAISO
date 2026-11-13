@@ -101,6 +101,28 @@ V3 적용 전에는 기존 매장 이미지와 재고 수량의 NULL을 실제 �
 
 Flyway를 아직 적용하지 않은 기존 공유·배포 DB가 있다면, 최초 도입 전에 기존 스키마와 초기 migration의 관계를 확인하고 baseline 또는 별도 전환 절차를 정한다. 기존 테이블에 초기 생성 SQL을 그대로 실행하지 않는다.
 
+### 개발용 더미 데이터
+
+[더미 데이터 SQL](../scripts/seed-dummy-data.sql)은 제공된 시트의 상품 15개·매장 8개·상품별 매장 재고 120개를 삽입한다. 시트 ID·품번·영업 상태·좋아요·찜·재고·픽업 값을 유지하며, 재고 탭의 거리는 매장별로 동일하므로 `store.distance`에 미터 단위로 저장한다. 이미지 URL은 시트 원문을 사용한다.
+
+스키마가 준비된 **데이터가 없는 개발 DB에서 한 번만** 실행한다. Flyway migration에 포함하거나 서버 시작 시 자동 실행하지 않는다. 기존 행을 삭제·갱신하지 않으며 중복 키 등 오류가 발생하면 중단해야 한다. 실패한 SQL 뒤에 수동으로 COMMIT하거나 mysql의 `--force` 옵션으로 계속 실행하지 않는다.
+
+프로젝트 루트에서 파일을 복사하고 컨테이너 셸에 접속한다. macOS·Windows PowerShell에서 같은 명령을 사용한다.
+
+```sh
+docker compose cp scripts/seed-dummy-data.sql mysql:/tmp/daiso-seed.sql
+docker compose exec mysql sh
+```
+
+컨테이너 셸에서 다음을 실행한다. Compose의 DB 계정·DB 이름·비밀번호를 사용하며, batch 모드에서 오류가 나면 연결 종료와 함께 미커밋 데이터가 롤백된다.
+
+```sh
+MYSQL_PWD="$MYSQL_PASSWORD" mysql --user="$MYSQL_USER" --database="$MYSQL_DATABASE" --default-character-set=utf8mb4 --batch < /tmp/daiso-seed.sql
+exit
+```
+
+삽입 후 `GET /api/v1/products`, `GET /api/v1/products/1/stores?soldOut=false`로 확인한다. 프론트는 시트의 상품 ID 1~15와 매장 ID 1~8을 사용할 수 있다. 품절 데이터는 전체 23개지만 상품 1은 모든 매장에 재고가 있으므로, 품절 제외 비교는 예를 들어 상품 3으로 확인한다.
+
 ### Migration 검증
 
 검증 테스트는 별도의 버릴 수 있는 MySQL DB를 준비한 다음 실행합니다. 아래 값은 검증 DB 접속 정보로 바꿉니다. `.env`의 개발 DB를 대상으로 사용하지 않습니다.
