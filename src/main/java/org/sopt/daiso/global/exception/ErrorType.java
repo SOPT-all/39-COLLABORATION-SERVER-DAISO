@@ -10,7 +10,9 @@ public enum ErrorType {
     FAVORITE_REQUIRED(HttpStatus.BAD_REQUEST, "찜 상태는 필수입니다."),
     INVALID_FAVORITE_TYPE(HttpStatus.BAD_REQUEST, "찜 상태는 true 또는 false여야 합니다."),
     INVALID_STORE_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 매장 ID입니다."),
-    STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "매장을 찾을 수 없습니다.");
+    STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "매장을 찾을 수 없습니다."),
+    INVALID_PRODUCT_ID(HttpStatus.BAD_REQUEST, "유효하지 않은 상품 ID입니다."),
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다.");
 
     private final HttpStatus status;
     private final String message;

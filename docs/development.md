@@ -107,7 +107,7 @@ macOS/zsh에서는 현재 명령에만 검증 DB 설정을 전달합니다.
 MIGRATION_DB_URL='jdbc:mysql://127.0.0.1:<검증 포트>/<검증 DB>?allowPublicKeyRetrieval=true&sslMode=DISABLED' \
 MIGRATION_DB_USER='<검증 계정>' \
 MIGRATION_DB_PASSWORD='<검증 비밀번호>' \
-./gradlew test --tests org.sopt.daiso.FlywayMigrationTests --tests org.sopt.daiso.store.StoreFavoriteIntegrationTest --rerun-tasks
+./gradlew test --tests org.sopt.daiso.FlywayMigrationTests --tests org.sopt.daiso.store.StoreFavoriteIntegrationTest --tests org.sopt.daiso.product.ProductLikeIntegrationTest --rerun-tasks
 ```
 
 Windows PowerShell:
@@ -116,14 +116,14 @@ Windows PowerShell:
 $env:MIGRATION_DB_URL='jdbc:mysql://127.0.0.1:<검증 포트>/<검증 DB>?allowPublicKeyRetrieval=true&sslMode=DISABLED'
 $env:MIGRATION_DB_USER='<검증 계정>'
 $env:MIGRATION_DB_PASSWORD='<검증 비밀번호>'
-./gradlew.bat test --tests org.sopt.daiso.FlywayMigrationTests --tests org.sopt.daiso.store.StoreFavoriteIntegrationTest --rerun-tasks
+./gradlew.bat test --tests org.sopt.daiso.FlywayMigrationTests --tests org.sopt.daiso.store.StoreFavoriteIntegrationTest --tests org.sopt.daiso.product.ProductLikeIntegrationTest --rerun-tasks
 ```
 
-`MIGRATION_DB_URL`이 없으면 해당 검증 테스트는 건너뜁니다. 테스트는 migration 이력, 테이블 생성, 자동 ID, nullable 재고, 외래키와 중복 방지를 확인합니다. Store 엔티티 매핑과 찜 API는 `StoreFavoriteIntegrationTest`에서 같은 migration 프로파일로 검증합니다. 별도 검증 DB 환경변수가 있어야 실행되며, 실제 HTTP 요청 후 커밋 결과·반복 요청·롤백·다른 컬럼 보존을 확인합니다.
+`MIGRATION_DB_URL`이 없으면 해당 검증 테스트는 건너뜁니다. 테스트는 migration 이력, 테이블 생성, 자동 ID, nullable 재고, 외래키와 중복 방지를 확인합니다. Store·Product 매핑과 상태 저장 API는 각각 `StoreFavoriteIntegrationTest`·`ProductLikeIntegrationTest`에서 같은 migration 프로파일로 검증합니다. 별도 검증 DB 환경변수가 있어야 실행되며, HTTP 요청 후 커밋 결과·반복 요청·롤백·다른 컬럼 보존을 확인합니다.
 
 ## 코드와 컨벤션
 
-아래는 노션에서 확인한 팀 개발 기준이다. 규칙의 존재와 코드 구현 여부를 구분하며, 미구현 클래스·구조를 현재 구현으로 간주하지 않는다.
+아래는 노션과 현재 코드에 맞춘 팀 개발 기준이다. 규칙의 존재와 코드 구현 여부를 구분하며, 미구현 클래스·구조를 현재 구현으로 간주하지 않는다.
 
 ### 브랜치·커밋
 
@@ -156,7 +156,7 @@ $env:MIGRATION_DB_PASSWORD='<검증 비밀번호>'
 - 조회 Service는 `@Transactional(readOnly = true)`, 변경 Service는 `@Transactional`을 사용한다.
 - Entity는 의미 있는 도메인 메서드로 상태를 변경한다. Request·Response DTO를 Entity와 분리하고 Entity를 직접 응답하지 않는다.
 - 공통 응답·예외 처리는 `global`에서 관리한다. 사용하지 않는 클래스·계층이나 불필요한 인터페이스는 미리 만들지 않는다.
-- 오류 코드는 `global.exception.ErrorType` Enum에서 HTTP 상태·코드·메시지와 함께 관리한다. `CustomException`은 RuntimeException을 상속하고 ErrorType을 보관하며, 공통·도메인 오류 모두 이 예외로 발생시킨다.
+- 오류 코드는 `global.exception.ErrorType` Enum에서 HTTP 상태·메시지와 함께 관리하며 Enum 이름을 응답 코드로 사용한다. `CustomException`은 RuntimeException을 상속하고 ErrorType을 보관하며, 공통·도메인 오류 모두 이 예외로 발생시킨다. 기능 추가 시 필요한 오류 항목만 추가하고 별도 인터페이스·예외 상속 계층을 선제적으로 만들지 않는다.
 - Service는 비즈니스 예외를 발생시키고, `@RestControllerAdvice`·`@ExceptionHandler`의 전역 처리기가 응답으로 변환한다. Controller마다 같은 try-catch를 반복하지 않는다.
 - 비즈니스 예외는 ErrorType의 HTTP 상태로, DTO 검증 실패는 400으로, 예상하지 못한 예외는 500으로 처리한다. 서버 오류는 로그에 남기되 내부 정보는 응답에 노출하지 않는다. 응답 필드·본문 형식은 [API 계약](api/api-contract.md#23-공통-응답)을 따른다.
 
@@ -164,7 +164,7 @@ $env:MIGRATION_DB_PASSWORD='<검증 비밀번호>'
 
 - Elasticsearch는 사용하지 않는다. 별도 검색 엔진 의존성·색인·연동 환경을 추가하지 않는다.
 - 상품 좋아요·매장 찜의 저장 정책은 [API 계약](api/api-contract.md#24-상품-좋아요매장-찜)을 따른다. 노션 문서에 남아 있던 이전 설명을 별도 정책으로 적용하지 않는다.
-- 스키마 선택 근거인 [ADR 0002](adr/0002-manage-schema-with-jpa-and-flyway.md)의 채택 여부는 팀 합의 후 반영한다.
+- 스키마 관리의 채택된 결정과 근거는 [ADR 0002](adr/0002-manage-schema-with-jpa-and-flyway.md)를 따른다.
 
 ## 문서별 원본과 갱신 기준
 

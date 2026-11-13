@@ -2,7 +2,7 @@
 
 ## Context
 
-현재 Store 엔티티와 공통 응답·예외 처리 구현이 없다. [개발 규칙](../../../docs/development.md#계층공통-예외-처리)과 [ADR 0002](../../../docs/adr/0002-manage-schema-with-jpa-and-flyway.md)를 따른다. 동기는 proposal.md를 참고한다.
+현재 Store 엔티티와 공통 응답·예외 처리 구현이 없다. [개발 규칙](../../../../docs/development.md#계층공통-예외-처리)과 [ADR 0002](../../../../docs/adr/0002-manage-schema-with-jpa-and-flyway.md)를 따른다. 동기는 proposal.md를 참고한다.
 
 ## Goals / Non-Goals
 

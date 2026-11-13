@@ -5,7 +5,7 @@
 > 정본 위치: `docs/api/api-contract.md`
 > 기준: [팀 API 명세서](https://app.notion.com/p/API-65614af65e0683fc8032815fa74f5650?source=copy_link) — 상세 API 확인 및 팀 확정 정책 반영. 구현 완료를 뜻하지 않음
 > 버전: v0.1
-> 최종 수정: 2026-11-12
+> 최종 수정: 2026-11-13
 
 ## 1. 목적
 
@@ -70,12 +70,12 @@
 - 아래 Path는 공통 접두사 `/api/v1`을 제외한 경로다.
 - API 주소 수: `4`
 
-| Method | Path | 설명 | 담당자 |
-| --- | --- | --- | --- |
-| `PATCH` | `/stores/{storeId}/favorite` | 관심매장 찜 | 김가영 |
-| `GET` | `/products/{productId}/stores` | 상품 재고 조회 | 김가영 |
-| `GET` | `/products` | 상품 목록 조회 | 노성빈 |
-| `PATCH` | `/products/{productId}/like` | 상품 좋아요 | 노성빈 |
+| Method | Path | 설명 | 담당자 | 코드 구현 상태 |
+| --- | --- | --- | --- | --- |
+| `PATCH` | `/stores/{storeId}/favorite` | [관심매장 찜](#4-관심매장-찜-설정-및-해제) | 김가영 | 구현됨 |
+| `GET` | `/products/{productId}/stores` | 상품 재고 조회 | 김가영 | 미구현 |
+| `GET` | `/products` | 상품 목록 조회 | 노성빈 | 미구현 |
+| `PATCH` | `/products/{productId}/like` | [상품 좋아요](#5-상품-좋아요-설정-및-해제) | 노성빈 | 구현됨 |
 
 기능 요구사항·시나리오는 [OpenSpec](../../openspec/AGENTS.md)에서 관리한다. 이 문서의 Draft API 목록은 구현 완료된 기능 명세가 아니다.
 
@@ -87,7 +87,7 @@
 - 요청 헤더: `Content-Type: application/json`
 - 경로 `storeId`: 필수 BIGINT. `1` 이상 `9223372036854775807` 이하 정수.
 - JSON 객체의 `favorite`: 필수 boolean. `true`는 설정, `false`는 해제. 누락과 null은 허용하지 않는다.
-- 동작 시나리오: [store-favorite 변경 명세](../../openspec/changes/store-favorite/specs/store-favorite/spec.md).
+- 동작 시나리오: [store-favorite 현재 명세](../../openspec/specs/store-favorite/spec.md).
 
 요청 예시:
 
@@ -126,6 +126,82 @@ Content-Type: application/json
 ```json
 {"code": "FAVORITE_REQUIRED", "message": "찜 상태는 필수입니다."}
 ```
+
+## 5. 상품 좋아요 설정 및 해제
+
+노션의 [상품 좋아요 계약](https://app.notion.com/p/41114af65e068099b5d9fb71ea42fbd9)을 반영한 구현이다. [현재 명세](../../openspec/specs/product-like/spec.md)에서 동작 시나리오를, [보관된 변경 제안](../../openspec/changes/archive/2026-11-13-product-like/proposal.md)에서 구현 범위를 확인한다.
+
+- 담당자: 노성빈
+- `PATCH /api/v1/products/{productId}/like`
+- 요청 헤더: `Content-Type: application/json`
+- `productId`: 필수 정수. `1` 이상 `9223372036854775807` 이하.
+- JSON 객체의 `liked`: 필수 boolean. 누락·null·문자열·숫자·객체·배열은 허용하지 않는다.
+- 인증·공유 상태·값 저장 기준은 [공통 정책](#24-상품-좋아요매장-찜)을 따른다.
+
+요청 예시:
+
+```json
+{"liked": true}
+```
+
+성공 응답: `200 OK`. `data.productId`는 BIGINT, `data.liked`는 저장된 boolean 상태다.
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "상품 좋아요 상태를 저장했습니다.",
+  "data": {"productId": 1001, "liked": true}
+}
+```
+
+| 상황 | HTTP 상태 | code | message |
+| --- | --- | --- | --- |
+| 상품 ID 형식 오류 또는 양의 int64 범위 밖 | 400 | INVALID_PRODUCT_ID | 유효하지 않은 상품 ID입니다. |
+| 본문·liked 누락, null, 불리언이 아닌 값, 잘못된 JSON 또는 객체가 아닌 본문 | 400 | INVALID_REQUEST | 요청 본문이 올바르지 않습니다. |
+| 유효한 ID에 해당하는 상품 없음 | 404 | PRODUCT_NOT_FOUND | 상품을 찾을 수 없습니다. |
+| 서버 내부 오류 | 500 | INTERNAL_SERVER_ERROR | 서버 내부 오류가 발생했습니다. |
+
+응답 형식과 405·415 처리는 [공통 응답](#23-공통-응답)을 따른다. 본문 오류는 매장 찜 전용 오류 코드와 구분하여 위 계약을 적용한다.
+
+## 6. 상품 목록 조회
+
+[노션 계약](https://app.notion.com/p/41114af65e068053bb99e20f1f55899b)을 기준으로 한 구현 예정 계약이며 현재 미구현이다.
+
+- `GET /api/v1/products`, 담당자: 노성빈.
+- 선택 쿼리 `keyword`는 앞뒤 공백을 제거하고 상품명 부분 일치 또는 품번 정확 일치로 검색한다. 생략·공백이면 전체 조회한다. 앱의 빈 검색어 제출 무시와 API의 전체 조회는 구분한다.
+- 페이지네이션 없이 조건에 맞는 모든 상품을 ID 오름차순으로 반환한다. 별도 정렬·필터 옵션을 추가하지 않는다.
+- 성공은 `200`, 메시지는 `상품 목록을 조회했습니다.`이며 `data.products` 배열에 productId(BIGINT), productNumber·name·price·imageUrl·reviewCount(String), liked(boolean)를 담는다. 결과가 없으면 빈 배열이다.
+- price는 서버에서 천 단위 쉼표와 `원`을 포함해 반환한다. reviewCount는 9,999 이하에서 쉼표를 적용하고 9,999 초과일 때만 `9999+`로 반환한다. `개`는 붙이지 않는다.
+- NEW 배지는 프론트에서 정적으로 표시한다. 별점은 제외하며 두 항목의 서버 필드를 추가하지 않는다.
+
+현행 V1의 가격·리뷰 수는 INT 컬럼이다. 위 문자열은 API 응답의 표시 형식이며 DB 타입 변경을 뜻하지 않는다. 상품 좋아요에서 추가한 Product·Repository를 이후 목록 조회에서 재사용한다.
+
+| 값 | price 응답 | reviewCount 응답 |
+| --- | --- | --- |
+| 0 | `"0원"` | `"0"` |
+| 1000 | `"1,000원"` | `"1,000"` |
+| 9999 | `"9,999원"` | `"9,999"` |
+| 10000 | `"10,000원"` | `"9999+"` |
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "상품 목록을 조회했습니다.",
+  "data": {
+    "products": [{
+      "productId": 1001,
+      "productNumber": "1023456",
+      "name": "수분 마스크팩",
+      "price": "1,000원",
+      "imageUrl": "https://example.com/product.png",
+      "reviewCount": "12",
+      "liked": false
+    }]
+  }
+}
+```
+
+실패는 공통 오류 응답을 사용한다. 서버 내부 오류는 `500`, `INTERNAL_SERVER_ERROR`, `서버 내부 오류가 발생했습니다.`다.
 
 ## 문서 작성 기준
 
