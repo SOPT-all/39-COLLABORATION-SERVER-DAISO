@@ -34,6 +34,12 @@ Docker Desktop이 준비된 후 `docker info`가 성공하는지 확인합니다
 
 IntelliJ의 Project SDK와 Gradle JVM도 Java 21로 맞춥니다. Wrapper의 실행 권한은 Git에서 관리하며, 권한이 유지되지 않는 파일 시스템에서는 `bash ./gradlew bootRun`으로 실행할 수 있습니다.
 
+## API 문서
+
+서버를 실행한 뒤 [Swagger UI](http://localhost:8088/swagger-ui.html)에서 구현된 API를 확인하고 호출할 수 있습니다. OpenAPI JSON은 [문서 endpoint](http://localhost:8088/v3/api-docs)에서 제공합니다. 팀 배포 서버에서도 같은 경로를 사용합니다.
+
+요청에 필요한 ID는 조회 결과의 값을 사용합니다. 좋아요·매장 찜을 실행하면 실제 공유 상태가 변경됩니다. 필드·오류의 원본은 [API 계약](docs/api/api-contract.md), 문서 수정·검증 기준은 [개발 가이드](docs/development.md#swagger-문서)를 참고합니다.
+
 ## GitHub Actions
 
 - `ci.yml`: `dev`·`main` 대상 PR에서 Java 21로 `clean bootJar`를 실행합니다. 테스트는 실행하지 않는 JAR 빌드 검사입니다.

@@ -1,10 +1,13 @@
 package org.sopt.daiso.store.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.sopt.daiso.global.exception.CustomException;
 import org.sopt.daiso.global.exception.ErrorType;
 import tools.jackson.databind.JsonNode;
 
-public record StoreFavoriteRequest(boolean favorite) {
+public record StoreFavoriteRequest(
+        @Schema(description = "저장할 공유 매장 찜 상태. true 설정, false 해제", example = "true",
+                requiredMode = Schema.RequiredMode.REQUIRED) boolean favorite) {
     public static StoreFavoriteRequest from(JsonNode body) {
         if (body == null) {
             throw new CustomException(ErrorType.FAVORITE_REQUIRED);

@@ -2,7 +2,7 @@
 
 ## Context
 
-기존 Store·공통 예외, 상품 목록·검색·좋아요 및 V1·V2 스키마를 기반으로 한다. [개발 규칙](../../../docs/development.md)과 [ADR 0002](../../../docs/adr/0002-manage-schema-with-jpa-and-flyway.md)를 따르며, 동기는 proposal.md에 둔다.
+기존 Store·공통 예외, 상품 목록·검색·좋아요 및 V1·V2 스키마를 기반으로 한다. [개발 규칙](../../../../docs/development.md)과 [ADR 0002](../../../../docs/adr/0002-manage-schema-with-jpa-and-flyway.md)를 따르며, 동기는 proposal.md에 둔다.
 
 ## Goals / Non-Goals
 
