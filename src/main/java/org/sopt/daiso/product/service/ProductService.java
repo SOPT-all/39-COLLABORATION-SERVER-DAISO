@@ -1,8 +1,11 @@
 package org.sopt.daiso.product.service;
 
+import java.util.List;
 import org.sopt.daiso.global.exception.CustomException;
 import org.sopt.daiso.global.exception.ErrorType;
 import org.sopt.daiso.product.dto.ProductLikeResponse;
+import org.sopt.daiso.product.dto.ProductListItemResponse;
+import org.sopt.daiso.product.dto.ProductListResponse;
 import org.sopt.daiso.product.entity.Product;
 import org.sopt.daiso.product.repository.ProductRepository;
 import org.springframework.stereotype.Service;
@@ -14,6 +17,15 @@ public class ProductService {
 
     public ProductService(ProductRepository productRepository) {
         this.productRepository = productRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public ProductListResponse getProducts(String keyword) {
+        String search = keyword == null ? "" : keyword.strip();
+        List<Product> products = search.isEmpty()
+                ? productRepository.findAllByOrderByIdAsc()
+                : productRepository.findByNameContainingOrProductNumberOrderByIdAsc(search, search);
+        return new ProductListResponse(products.stream().map(ProductListItemResponse::from).toList());
     }
 
     @Transactional

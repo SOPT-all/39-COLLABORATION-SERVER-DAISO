@@ -103,6 +103,15 @@ class ProductControllerTest {
     }
 
     @Test
+    void hidesListQueryFailureDetails() throws Exception {
+        when(service.getProducts(null)).thenThrow(new IllegalStateException("private database detail"));
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/products"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().json("{\"code\":\"INTERNAL_SERVER_ERROR\",\"message\":\"서버 내부 오류가 발생했습니다.\"}"))
+                .andExpect(jsonPath("$.data").doesNotExist());
+    }
+
+    @Test
     void returnsCommonErrorsAndPreservesFrameworkHeaders() throws Exception {
         mvc.perform(patch("/api/v1/products/201/like").contentType(MediaType.TEXT_PLAIN)
                         .content("liked=true"))

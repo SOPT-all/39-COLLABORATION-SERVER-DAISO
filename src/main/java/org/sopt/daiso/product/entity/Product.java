@@ -26,7 +26,7 @@ public class Product {
     @Column(nullable = false)
     private int price;
 
-    @Column(name = "image_url", length = 2048)
+    @Column(name = "image_url", nullable = false, length = 2048)
     private String imageUrl;
 
     @Column(name = "review_count", nullable = false)
@@ -40,6 +40,26 @@ public class Product {
 
     public Long getId() {
         return id;
+    }
+
+    public String getProductNumber() {
+        return productNumber;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public int getReviewCount() {
+        return reviewCount;
     }
 
     public boolean isLiked() {
