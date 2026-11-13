@@ -8,7 +8,7 @@
 
 - Spring Boot 4.1.2에 호환되는 springdoc으로 OpenAPI 문서와 기본 Swagger UI를 제공한다.
 - 로컬과 팀 배포 환경에서 문서 조회·API 실행을 허용하고 상품·매장 태그와 접힌 API 상세로 화면을 정돈한다.
-- 구현된 API 4개의 입력·구체적 응답·오류·예시를 [API 계약](../../../docs/api/api-contract.md)에 맞게 표현한다. 기존 HTTP 동작·직렬화·DB 제약은 유지한다.
+- 구현된 API 4개의 입력·구체적 응답·오류·예시를 [API 계약](../../../../docs/api/api-contract.md)에 맞게 표현한다. 기존 HTTP 동작·직렬화·DB 제약은 유지한다.
 - 생성된 명세와 실제 JSON을 대조하고 기존 README·개발 가이드에 접속·유지 관리 방법을 통합한다.
 
 ## Capabilities

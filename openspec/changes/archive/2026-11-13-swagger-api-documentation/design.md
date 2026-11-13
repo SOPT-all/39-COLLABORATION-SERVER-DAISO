@@ -2,9 +2,9 @@
 
 ## Context
 
-[제안](proposal.md)의 동기를 따른다. 기준은 최신 머지된 dev와 작업 브랜치의 공통 커밋 `2eb9b7e`다. Java 21·Spring Boot 4.1.2·Spring MVC를 사용하고 Swagger 의존성·설정은 없다. 구현된 API 4개와 Controller 3개, 실제 record DTO·수동 검증·계산 getter를 조사했다.
+[제안](proposal.md)의 동기를 따른다. 제안 당시 기준은 머지된 dev와 작업 브랜치의 공통 커밋 `2eb9b7e`였다. Java 21·Spring Boot 4.1.2·Spring MVC를 사용하며 Swagger 의존성·설정은 없는 상태였다. 구현된 API 4개와 Controller 3개, 실제 record DTO·수동 검증·계산 getter를 조사했다.
 
-HTTP 원본은 [API 계약](../../../docs/api/api-contract.md), 개발·검증 절차는 [개발 가이드](../../../docs/development.md)를 따른다. 기존 기능 명세는 변경하지 않는다. DB와 스키마 관리 선택도 그대로 유지하므로 새로운 ADR을 추가하지 않는다.
+HTTP 원본은 [API 계약](../../../../docs/api/api-contract.md), 개발·검증 절차는 [개발 가이드](../../../../docs/development.md)를 따른다. 기존 기능 명세는 변경하지 않는다. DB와 스키마 관리 선택도 그대로 유지하므로 새로운 ADR을 추가하지 않는다.
 
 ## Goals / Non-Goals
 
@@ -24,7 +24,7 @@ HTTP 원본은 [API 계약](../../../docs/api/api-contract.md), 개발·검증 �
 
 ### 문서화 위치와 필드 조사 결과
 
-Controller에 짧은 제목·설명과 입력·응답 보완을 직접 작성하고 DTO에 필드 설명·예시를 둔다. 공통 `ApiResponse`와 Swagger 응답 어노테이션은 이름이 같으므로 문서 어노테이션에 필요한 완전 수식명을 사용한다. 기존 공통 응답 클래스의 이름을 바꾸거나 이 충돌만을 위한 추상화를 만들지 않는다.
+Controller에 짧은 제목·설명과 입력·응답 보완을 직접 작성하고 DTO에 필드 설명·예시를 둔다. 공통 `ApiResponse`와 Swagger 응답 어노테이션은 이름이 같으므로 문서 어노테이션에 필요한 완전 수식명을 사용한다. 기존 공통 응답 클래스의 이름을 바꾸거나 이 충돌만을 위한 추상화를 만들지 않는다. 반환형 추론을 쓰는 응답은 `@ApiResponses`에 선언하고 기본 문서 응답 매체를 JSON으로 맞춘다. springdoc 3.2.0에서 `@Operation.responses` 안의 추론 플래그가 적용되지 않거나 기본 */* 매체로 schema가 분리되는 것을 방지한다.
 
 | 대상 | 생성 문서에서 확인·보완할 지점 |
 | --- | --- |

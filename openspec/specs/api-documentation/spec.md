@@ -1,13 +1,13 @@
-# Spec Delta
+# api-documentation Specification
 
 ## Purpose
 
 팀원이 구현된 API의 입력과 응답을 정확히 확인하고 직접 호출할 수 있는 문서를 제공한다. 실제 HTTP 계약에 맞는 타입·필수값·예시·오류를 보여주며 개발 및 팀 배포 환경에서 같은 사용 흐름을 유지한다.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: API 문서 제공
-시스템은 SHALL 로컬과 팀 배포 환경에서 Swagger UI와 OpenAPI JSON을 제공하고 [API 계약](../../../../../docs/api/api-contract.md)의 구현된 API를 상품·매장 태그로 표시한다.
+시스템은 SHALL 로컬과 팀 배포 환경에서 Swagger UI와 OpenAPI JSON을 제공하고 [API 계약](../../../docs/api/api-contract.md)의 구현된 API를 상품·매장 태그로 표시한다.
 
 #### Scenario: 문서 접근
 - **WHEN** 로컬 또는 팀 배포 서버의 문서 주소에 접근한다

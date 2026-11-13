@@ -54,6 +54,14 @@ Codex에서 `$openspec-propose`처럼 호출하거나 Skills 목록에서 선택
 
 단계별 상세 절차는 [.agents/skills](../.agents/skills/)의 해당 Skill을 따른다. 생성된 Skill 수정과 버전 갱신은 [하네스 설정](harness.md#openspec-설정)을 따른다.
 
+### Swagger 문서
+
+접속 방법은 [README](../README.md#api-문서), HTTP 필드·오류의 원본은 [API 계약](api/api-contract.md)을 따른다. 문서 설정은 `OpenApiConfig`·application 설정, 공개 필드 설명은 Controller·DTO에서 관리한다.
+
+- JsonNode 본문과 String으로 수신하는 ID·soldOut은 문서에 실제 계약의 타입·필수 여부·기본값을 명시한다. 문서 표시를 위해 기존 수신 타입·검증·직렬화를 바꾸지 않는다.
+- 성공 응답은 메서드의 구체적인 제네릭 반환형을 유지한다. springdoc 3.2.0에서는 반환형 추론을 쓰는 응답 설명을 `@ApiResponses`에 두고 `useReturnTypeSchema=true`를 사용한다. 기본 문서 응답 매체는 JSON으로 맞춰 예시와 schema가 서로 다른 매체로 나뉘지 않게 한다.
+- DTO를 변경하면 `OpenApiDocumentationTest`로 생성 문서의 필드·타입·필수 여부를 실제 JSON과 대조한다. 계산 getter도 확인하고, Entity·내부 변환 DTO를 공개 모델로 추가하지 않는다. 이 테스트도 별도 migration 검증 DB 환경변수가 필요하다.
+
 ## 검증 기준
 
 프로젝트 루트에서 Java 21과 Gradle Wrapper를 사용한다. 아래 명령은 macOS/zsh 기준이며 Windows PowerShell에서는 `./gradlew`를 `./gradlew.bat`로 바꾼다.
