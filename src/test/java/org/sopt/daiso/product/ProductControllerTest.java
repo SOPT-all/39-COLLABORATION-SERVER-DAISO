@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.sopt.daiso.global.exception.GlobalExceptionHandler;
+import org.sopt.daiso.global.exception.InventoryStorageExceptionHandler;
 import org.sopt.daiso.product.controller.ProductController;
 import org.sopt.daiso.product.dto.ProductLikeResponse;
 import org.sopt.daiso.global.exception.CustomException;
@@ -26,7 +27,21 @@ class ProductControllerTest {
     void setUp() {
         service = mock(ProductService.class);
         mvc = MockMvcBuilders.standaloneSetup(new ProductController(service))
-                .setControllerAdvice(new GlobalExceptionHandler()).build();
+                .setControllerAdvice(new InventoryStorageExceptionHandler(), new GlobalExceptionHandler()).build();
+    }
+
+    @Test
+    void inventoryStorageAdvicePreservesProductErrorContracts() throws Exception {
+        when(service.getProducts(null)).thenThrow(new org.springframework.dao.QueryTimeoutException("private detail"));
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/products"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code").value("INTERNAL_SERVER_ERROR"));
+        when(service.changeLiked(201, true)).thenThrow(
+                new org.springframework.transaction.CannotCreateTransactionException("private detail"));
+        mvc.perform(patch("/api/v1/products/201/like").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"liked\":true}"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code").value("INTERNAL_SERVER_ERROR"));
     }
 
     @ParameterizedTest

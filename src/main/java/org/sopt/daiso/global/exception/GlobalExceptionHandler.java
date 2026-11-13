@@ -1,5 +1,8 @@
 package org.sopt.daiso.global.exception;
 
+import java.sql.SQLException;
+import org.hibernate.PropertyValueException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sopt.daiso.global.response.ErrorResponse;
@@ -44,6 +47,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         ErrorType type = ErrorType.UNSUPPORTED_MEDIA_TYPE;
         return new ResponseEntity<>(new ErrorResponse(type.getCode(), type.getMessage()), headers, status);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException exception) {
+        if (exception.contains(PropertyValueException.class)) {
+            return error(ErrorType.NULL_VALUE_NOT_ALLOWED);
+        }
+        for (Throwable cause = exception; cause != null; cause = cause.getCause()) {
+            if (cause instanceof SQLException sqlException
+                    && (sqlException.getErrorCode() == 1048 || sqlException.getErrorCode() == 1364)) {
+                return error(ErrorType.NULL_VALUE_NOT_ALLOWED);
+            }
+        }
+        return handleUnexpectedException(exception);
     }
 
     @ExceptionHandler(Exception.class)

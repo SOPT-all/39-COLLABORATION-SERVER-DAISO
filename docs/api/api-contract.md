@@ -56,6 +56,7 @@
 | --- | --- | --- | --- |
 | 지원하지 않는 HTTP 메서드 | 405 | METHOD_NOT_ALLOWED | 지원하지 않는 HTTP 메서드입니다. |
 | 지원하지 않는 Content-Type | 415 | UNSUPPORTED_MEDIA_TYPE | 지원하지 않는 Content-Type입니다. |
+| DB·JPA 필수값 누락 저장 | 400 | NULL_VALUE_NOT_ALLOWED | 필수값은 null일 수 없습니다. |
 
 ### 2.4 상품 좋아요·매장 찜
 
@@ -73,7 +74,7 @@
 | Method | Path | 설명 | 담당자 | 코드 구현 상태 |
 | --- | --- | --- | --- | --- |
 | `PATCH` | `/stores/{storeId}/favorite` | [관심매장 찜](#4-관심매장-찜-설정-및-해제) | 김가영 | 구현됨 |
-| `GET` | `/products/{productId}/stores` | 상품 재고 조회 | 김가영 | 미구현 |
+| `GET` | `/products/{productId}/stores` | [상품 재고 조회](#7-상품별-매장-재고-조회) | 김가영 | 구현됨 |
 | `GET` | `/products` | [상품 목록 조회](#6-상품-목록-조회) | 노성빈 | 구현됨 |
 | `PATCH` | `/products/{productId}/like` | [상품 좋아요](#5-상품-좋아요-설정-및-해제) | 노성빈 | 구현됨 |
 
@@ -211,6 +212,93 @@ GET /api/v1/products?keyword=마스크팩
 ```
 
 실패는 공통 오류 응답을 사용한다. 서버 내부 오류는 `500`, `INTERNAL_SERVER_ERROR`, `서버 내부 오류가 발생했습니다.`다.
+
+## 7. 상품별 매장 재고 조회
+
+- 담당자: 김가영
+- `GET /api/v1/products/{productId}/stores`
+- 인증·사용자 ID 및 요청 본문 없음.
+- 경로 `productId`: 필수 BIGINT. `1` 이상 `9223372036854775807` 이하 정수.
+- 쿼리 `soldOut`: 선택 boolean. 생략 시 `true`. `true`는 재고 1 이상만 조회하고, `false`는 품절 필터를 적용하지 않는다.
+- `soldOut`은 소문자 `true`·`false`만 허용하며 빈 값·숫자·중복 입력은 400이다.
+- 재고 관계가 없는 매장은 반환하지 않는다. 상품이 존재하되 조건에 맞는 결과가 없으면 200과 `stores: []`를 반환한다.
+- 정렬·페이지네이션은 정의하지 않는다.
+- 동작 시나리오: [상품 재고 조회 명세](../../openspec/specs/product-store-inventory/spec.md).
+
+```http
+GET /api/v1/products/1001/stores
+GET /api/v1/products/1001/stores?soldOut=false
+```
+
+| 응답 필드 | 타입 | 설명 |
+| --- | --- | --- |
+| data.productId | BIGINT | 상품 ID |
+| data.product | Object | 상단 상품 정보. [상품 목록](#6-상품-목록-조회)의 상품 항목과 동일한 필드·타입·표시 형식이며 productId는 data.productId와 일치 |
+| data.stores | Array<Object> | 조건에 맞는 매장 재고 목록 |
+| data.stores[].storeId | BIGINT | 매장 고유 ID |
+| data.stores[].storeName | String | 매장명 |
+| data.stores[].imageUrl | String | 필수 매장 이미지 URL. 변경 ERD에 따라 null을 허용하지 않음 |
+| data.stores[].businessStatus | Enum(String) | 직접 저장한 영업 상태. OPEN: 영업중, CLOSED: 영업 전. 시간 기반 자동 계산 없음 |
+| data.stores[].bookmarked | Boolean | 공유 매장 찜 상태. favorite와 같은 값 |
+| data.stores[].distanceMeters | BIGINT | 원본 거리. 항상 미터 단위 |
+| data.stores[].distance | String | 표시용 거리. 1000m 미만은 m, 이상은 km. 소수 첫째 자리 반올림 및 불필요한 0 제거 |
+| data.stores[].stockQuantity | INT | 필수 재고 수량. 0은 품절이며 프론트에서 품절 표시 |
+| data.stores[].pickupAvailable | Boolean | true: 픽업 지원, false: 픽업 미지원. 재고 유무와 독립 |
+
+성공 응답: `200 OK`, 아래는 `soldOut=false` 예시다. 조건에 맞는 매장이 없어도 `product`는 반환하고 `stores`만 빈 배열로 반환한다.
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "상품의 매장별 재고가 조회되었습니다.",
+  "data": {
+    "productId": 1001,
+    "product": {
+      "productId": 1001,
+      "productNumber": "1075034",
+      "name": "상품명",
+      "price": "5,000원",
+      "imageUrl": "https://example.com/product.png",
+      "reviewCount": "23",
+      "liked": false
+    },
+    "stores": [
+      {
+        "storeId": 201,
+        "storeName": "강남본점",
+        "imageUrl": "https://example.com/stores/201.png",
+        "businessStatus": "OPEN",
+        "bookmarked": true,
+        "distanceMeters": 850,
+        "distance": "850m",
+        "stockQuantity": 12,
+        "pickupAvailable": false
+      },
+      {
+        "storeId": 202,
+        "storeName": "역삼점",
+        "imageUrl": "https://example.com/stores/202.png",
+        "businessStatus": "CLOSED",
+        "bookmarked": false,
+        "distanceMeters": 1500,
+        "distance": "1.5km",
+        "stockQuantity": 0,
+        "pickupAvailable": true
+      }
+    ]
+  }
+}
+```
+
+실패 응답은 공통 `code`, `message` 형식을 따른다. 저장소 연결·트랜잭션 시작 실패·조회 타임아웃은 이 조회 API에서 503으로 처리하고, 예상하지 못한 오류는 500으로 처리한다.
+
+| 상황 | HTTP 상태 | code | message |
+| --- | --- | --- | --- |
+| 상품 ID 형식·범위 오류 | 400 | INVALID_PRODUCT_ID | 유효하지 않은 상품 ID입니다. |
+| 잘못된 soldOut | 400 | INVALID_EXCLUDE_SOLD_OUT | 품절 제외 여부는 true 또는 false여야 합니다. |
+| 상품 없음 | 404 | PRODUCT_NOT_FOUND | 상품을 찾을 수 없습니다. |
+| 서버 내부 오류 | 500 | INTERNAL_SERVER_ERROR | 서버 내부 오류가 발생했습니다. |
+| 저장소 장애 | 503 | STORAGE_UNAVAILABLE | 일시적으로 매장별 재고를 조회할 수 없습니다. 잠시 후 다시 시도해 주세요. |
 
 ## 문서 작성 기준
 

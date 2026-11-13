@@ -3,9 +3,11 @@ package org.sopt.daiso.product.service;
 import java.util.List;
 import org.sopt.daiso.global.exception.CustomException;
 import org.sopt.daiso.global.exception.ErrorType;
+import org.sopt.daiso.inventory.repository.StoreInventoryRepository;
 import org.sopt.daiso.product.dto.ProductLikeResponse;
 import org.sopt.daiso.product.dto.ProductListItemResponse;
 import org.sopt.daiso.product.dto.ProductListResponse;
+import org.sopt.daiso.product.dto.ProductStoresResponse;
 import org.sopt.daiso.product.entity.Product;
 import org.sopt.daiso.product.repository.ProductRepository;
 import org.springframework.stereotype.Service;
@@ -14,9 +16,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ProductService {
     private final ProductRepository productRepository;
+    private final StoreInventoryRepository inventoryRepository;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, StoreInventoryRepository inventoryRepository) {
         this.productRepository = productRepository;
+        this.inventoryRepository = inventoryRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public ProductStoresResponse findStores(long productId, boolean soldOut) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorType.PRODUCT_NOT_FOUND));
+        return new ProductStoresResponse(productId, ProductListItemResponse.from(product),
+                inventoryRepository.findStores(productId, soldOut));
     }
 
     @Transactional(readOnly = true)
