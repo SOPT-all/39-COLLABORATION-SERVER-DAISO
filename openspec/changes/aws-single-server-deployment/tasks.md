@@ -4,14 +4,16 @@
 
 ## 1. 서버 외부 검증과 SSM 배포 코드
 
-- [ ] 1.1 CI·CD를 Java 21·ARM64 빌드와 일회용 MySQL 전체 테스트로 정리한다. 로컬/Actions 검사에서 실패·필수 테스트 건너뜀 시 배포가 실행되지 않고, 이미지 manifest와 실제 실행으로 ARM64 호환을 확인한다.
-- [ ] 1.2 CD의 SSH·장기 AWS 키 의존을 제거하고 practice-production Environment의 main 전용 OIDC·지정 EC2 SSM 호출·명령 결과 대기를 구현한다. 잘못된 대상·명령 실패·시간 초과를 포함한 필요한 범위의 검사로 성공 오판과 비밀값 출력을 확인한다. 이 단계에서 실제 AWS 권한을 만들거나 기존 팀 Secrets를 덮어쓰지 않는다.
-- [ ] 1.3 scripts/deploy.sh에 고정 digest pull·배포 직렬화·DB 유지·상태 확인·직전 버전 기록을 구현한다. 격리된 컨테이너에서 pull 실패·최초 실패·앱 실패·DB 변경 여부에 따른 복구와 상태 보존을 검증한다. 사용법·실패 조건은 개발 가이드의 기존 배포 관련 설명에 통합한다.
+- [x] 1.1 CI·CD를 Java 21·ARM64 빌드와 일회용 MySQL 전체 테스트로 정리한다. 로컬/Actions 검사에서 실패·필수 테스트 건너뜀 시 배포가 실행되지 않고, 이미지 manifest와 실제 실행으로 ARM64 호환을 확인한다.
+- [x] 1.2 CD의 SSH·장기 AWS 키 의존을 제거하고 practice-production Environment의 main 전용 OIDC·지정 EC2 SSM 호출·명령 결과 대기를 구현한다. 잘못된 대상·명령 실패·시간 초과를 포함한 필요한 범위의 검사로 성공 오판과 비밀값 출력을 확인한다. 이 단계에서 실제 AWS 권한을 만들거나 기존 팀 Secrets를 덮어쓰지 않는다.
+- [x] 1.3 scripts/deploy.sh에 고정 digest pull·배포 직렬화·DB 유지·상태 확인·직전 버전 기록을 구현한다. 격리된 컨테이너에서 pull 실패·최초 실패·앱 실패·DB 변경 여부에 따른 복구와 상태 보존을 검증한다. 사용법·실패 조건은 개발 가이드의 기존 배포 관련 설명에 통합한다.
 
 ## 2. 작은 서버의 실행 설정과 준비 코드
 
-- [ ] 2.1 docker-compose.prod.yml에 Spring·MySQL·내부 DB 네트워크·볼륨·메모리/스왑/로그 제한·재시작/health를 설정한다. Compose 해석과 실제 ARM64 컨테이너 기동으로 V1~V3·JPA validate·대표 API·볼륨 보존을 확인한다. 로컬 Compose 동작이 바뀌지 않았는지 함께 확인한다.
+- [x] 2.1 docker-compose.prod.yml에 Spring·MySQL·내부 DB 네트워크·볼륨·메모리/스왑/로그 제한·재시작/health를 설정한다. Compose 해석과 실제 ARM64 컨테이너 기동으로 V1~V3·JPA validate·대표 API·볼륨 보존을 확인한다. 로컬 Compose 동작이 바뀌지 않았는지 함께 확인한다.
 - [ ] 2.2 scripts/bootstrap-server.sh에 Docker·Compose·SSM Agent 준비와 1GiB 스왑·fstab·권한·재실행 시 중복 방지를 구현한다. 셸 검사와 버릴 수 있는 Linux 환경에서 최초/반복 실행을 확인하고, 파괴적 재초기화나 AWS 생성 명령이 없는지 검토한다. 승인받은 EC2에서만 실제 적용·재부팅 확인을 수행하며 개발 가이드에 준비·확인·종료 절차를 통합한다.
+
+2.2의 스크립트 작성·셸 검사와 설치/시스템 명령을 모의한 Ubuntu 반복 실행 검사는 완료했다. 실제 패키지 설치·스왑 활성화·EC2 재부팅 검증은 승인 후 수행하므로 미완료로 유지한다. SSM 실패 처리는 모의 API, 앱 복구 분기는 Linux 내 모의 Docker로 검증했으며 실제 AWS 권한·실패 복구는 아래 통합 검증에 남아 있다.
 
 ## 3. 확인받은 AWS·GitHub 연결
 

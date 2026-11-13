@@ -39,11 +39,11 @@
 
 ### 2. 서버 외부 빌드와 이미지 전달
 
-기존 Dockerfile·GHCR을 재사용하고 GitHub의 `ubuntu-24.04-arm` runner에서 `linux/arm64` 이미지를 만든다. x64 이미지를 EC2에서 빌드하거나 에뮬레이션하는 방법은 사용하지 않는다. Temurin·MySQL 태그의 ARM64 manifest를 구현 시 확인한다.
+GHCR과 Dockerfile의 런타임 구성을 재사용하되 검증한 JAR만 이미지에 복사하고 GitHub의 `ubuntu-24.04-arm` runner에서 `linux/arm64` 이미지를 만든다. x64 이미지를 EC2에서 빌드하거나 에뮬레이션하는 방법은 사용하지 않는다. Temurin·MySQL 태그의 ARM64 manifest를 구현 시 확인한다.
 
 PR 및 배포 전 검사에서 Java 21과 일회용 MySQL을 사용해 기존 전체 테스트·문서 테스트·migration을 실행한다. DB 환경변수를 명시하고 필수 테스트가 건너뛰어지지 않았는지 확인한다. 테스트·빌드가 성공한 커밋만 GHCR에 SHA 태그로 게시하고 실제 배포는 digest로 고정한다. 서버에서 Gradle·이미지 빌드는 실행하지 않는다.
 
-GHCR 패키지를 임의로 공개 전환하지 않는다. 비공개 pull을 기준으로 read:packages만 가진 인증을 준비하며 토큰은 서버의 제한된 권한 파일에 최초 준비한다. GitHub가 비밀값을 SSM 명령에 삽입해 로그인시키던 방식은 제거한다. 이미지 접근 인증은 AWS 장기 키와 구분한다. `.env`·비밀값을 이미지·빌드 인자·배포 명령 로그에 넣지 않는다.
+GHCR 패키지를 임의로 공개 전환하지 않는다. 비공개 pull을 기준으로 read:packages만 가진 인증을 준비하며 토큰은 서버의 제한된 권한 파일에 최초 준비한다. GitHub에서 비밀값을 SSM 명령에 삽입해 로그인시키지 않는다. 이미지 접근 인증은 AWS 장기 키와 구분한다. `.env`·비밀값을 이미지·빌드 인자·배포 명령 로그에 넣지 않는다.
 
 ### 3. GitHub OIDC와 SSM
 

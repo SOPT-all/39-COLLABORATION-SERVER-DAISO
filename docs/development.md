@@ -77,7 +77,33 @@ Codex에서 `$openspec-propose`처럼 호출하거나 Skills 목록에서 선택
 
 ADR 검사에서 ADR011은 [ADR 목록의 원문 누락 항목](adr/README.md#adr-목록)을 확인한다. 기존 0002의 대안 표·한국어 영향 목록은 ADR016·ADR017 안내가 나올 수 있다. 기존 내용을 형식에 맞추려고 바꾸거나 경고를 숨기지 않고, 새로운 경고·오류는 별도로 확인한다.
 
-테스트의 `SKIPPED`와 실행 성공을 구분한다. DB나 필요한 환경변수가 없어 실행하지 못한 검증은 그 사유를 밝힌다. 현재 CI의 `bootJar` 검사는 테스트 실행이나 DB 검증을 대신하지 않는다.
+테스트의 `SKIPPED`와 실행 성공을 구분한다. DB나 필요한 환경변수가 없어 실행하지 못한 검증은 그 사유를 밝힌다. CI는 일회용 MySQL로 전체 테스트를 실행하며 `scripts/check-test-results.py`가 실패·건너뜀·빈 보고서를 거부한다. CI 통과가 실제 EC2 메모리·네트워크 검증을 대신하지는 않는다.
+
+## 배포 작업
+
+연결할 설정값은 [README](../README.md#github-actions와-배포-준비), 미완료 인프라·실서버 검증은 [진행 중인 배포 변경](../openspec/changes/aws-single-server-deployment/proposal.md)에서 확인한다. 현재 AWS 배포 완료 상태가 아니다.
+
+### 최초 준비
+
+1. AWS 생성·권한·비용·접근 범위를 확인받고 서울 ARM64 Ubuntu 24.04 서버와 SSM 연결을 준비한다. GitHub Environment main 제한과 OIDC 신뢰 조건을 함께 확인한다.
+2. 서버 초기 변경을 확인받은 뒤 해당 커밋의 `scripts/bootstrap-server.sh`를 root로 `bash scripts/bootstrap-server.sh --approved` 실행한다. Docker·Compose·SSM Agent, 스왑 1GiB·재부팅 유지·swappiness 10과 `/opt/daiso`를 준비한다. 기존 스왑이 다르면 덮어쓰지 않고 중단한다. 이 인자는 실제 사용자 승인을 대신하지 않는다.
+3. 승인받은 대화형 서버 세션에서 사용자가 `.env`와 root의 GHCR 인증을 준비한다. 비밀값은 채팅·저장소·Run Command 인자에 넣지 않는다. 세션 기록 설정도 먼저 확인하고 환경 파일은 root 소유 600, Docker 인증 파일은 root만 읽도록 제한한다. 인증 파일은 암호화된 비밀 저장소가 아니다.
+4. 새 DB의 schema는 기존 Flyway로 생성한다. 더미 데이터는 별도 확인 후 [기존 SQL 절차](#개발용-더미-데이터)를 배포 Compose 경로·프로젝트에 맞춰 한 번만 수행한다. 자동 배포는 더미를 삽입하지 않는다.
+
+### 배포와 확인
+
+- main 반영 → 전체 테스트 → ARM64 이미지 게시 → SSM 최종 결과 → 외부 URL 확인 순서다. AWS 자격증명은 OIDC로 일시 발급하며 SSH 배포 키는 사용하지 않는다.
+- `scripts/deploy-ssm.py`는 커밋 고정 소스를 `/opt/daiso/releases/<SHA>`에 준비하고 `scripts/deploy.sh`를 실행한다. SSM 기록에는 소스 주소·이미지 digest만 전달하며 원격 로그 본문을 Actions에 출력하지 않는다.
+- 배포 스크립트는 중복 실행을 잠그고 새 이미지를 먼저 받은 뒤 DB health·앱 health를 확인한다. `/opt/daiso/state`에 현재·직전 이미지와 소스 경로를 남긴다. 단일 앱 교체이므로 잠시 접속이 끊길 수 있다.
+- 앱 384MiB·heap 192MiB, DB 320MiB·buffer pool 64MiB·최대 연결 20, 로그 10MiB × 3으로 시작한다. 실제 t4g.micro에서 부하·RSS·스왑·OOM·재부팅 후 실행을 추가 확인한다. 로컬 컨테이너 성공만으로 이 확인을 대체하지 않는다.
+- 배포 설정만 검사하려면 서버 환경값과 `BACKEND_IMAGE`를 준비하고 `docker compose --env-file <환경 파일> -f docker-compose.prod.yml config --quiet`를 실행한다. 설정 전체 출력에는 비밀값이 포함될 수 있으므로 공유하지 않는다.
+
+### 실패·종료
+
+- pull·SSM·health 실패는 배포 실패로 남는다. 앱 기동 실패 시 직전 성공 버전과 migration 파일과 배포 전후 실제 Flyway 이력이 동일하게 확인될 때만 이전 이미지·Compose로 앱을 복구하고, 복구 성공도 신규 배포 성공으로 표시하지 않는다.
+- 최초 배포·migration 변경·상태 불명확 시 자동 복구를 하지 않는다. 승인된 서버 세션에서 컨테이너 상태·로그·Flyway 이력·실제 스키마를 먼저 확인한다. DB를 지우거나 migration 이력을 강제로 바꾸지 않는다. 외부 접속 실패는 앱 교체보다 보안그룹·주소부터 확인한다.
+- 재배포는 DB 볼륨을 유지한다. `down --volumes`, 볼륨 prune, 디스크 삭제를 복구 방법으로 사용하지 않는다. 종료 전에는 DB 손실 영향과 리소스 해제 범위를 사용자에게 확인받는다. 자동 백업은 없으며 서버 중지 뒤에도 디스크·고정 IP 비용은 남을 수 있다.
+- 이전 소스·이미지는 자동 삭제하지 않는다. 디스크 사용량이 늘면 현재·직전 복구 버전을 확인한 뒤 불필요한 버전만 정리한다.
 
 ## 현재 적용된 스키마 관리
 
