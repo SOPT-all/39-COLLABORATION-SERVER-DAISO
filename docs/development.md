@@ -125,7 +125,7 @@ $env:MIGRATION_DB_PASSWORD='<검증 비밀번호>'
 
 `MIGRATION_DB_URL`이 없으면 해당 검증 테스트는 건너뜁니다. 테스트는 migration 이력, 테이블 생성, 자동 ID, 필수 재고, 외래키와 중복 방지를 확인합니다. Store·Product 매핑과 상태 저장 API는 각각 `StoreFavoriteIntegrationTest`·`ProductLikeIntegrationTest`에서 같은 migration 프로파일로 검증합니다. 별도 검증 DB 환경변수가 있어야 실행되며, HTTP 요청 후 커밋 결과·반복 요청·롤백·다른 컬럼 보존을 확인합니다.
 
-`FlywayMigrationTests`는 V1·V2·V3 적용 이력과 상품·매장 이미지 및 재고의 null 거부도 확인합니다. `StoreInventoryMigrationTest`는 UUID로 구분한 일회용 DB를 생성·삭제하여 V2 대표 데이터의 V3 업그레이드와 NULL 거부를 확인하므로 DB 생성·삭제 권한이 필요합니다. `ProductStoresIntegrationTest`는 품절 필터·상품별 분리·빈 결과·공유 찜 반영과 매장 수 증가에도 SELECT가 2회인지 확인합니다. `ProductListIntegrationTest`는 빈 검증 DB에 자체 상품 데이터를 준비해 전체·검색·정렬·특수문자·표시 경계값·저장된 이미지 URL 반환·좋아요 변경 후 재조회를 확인합니다. 위 전체 migration 검증과 별도로, 기존 V1 데이터의 이미지를 준비한 뒤 V2를 적용해 데이터 보존도 확인해야 합니다.
+`FlywayMigrationTests`는 V1·V2·V3 적용 이력과 상품·매장 이미지 및 재고의 null 거부도 확인합니다. `StoreInventoryMigrationTest`는 UUID로 구분한 일회용 DB를 생성·삭제하여 V2 대표 데이터의 V3 업그레이드와 NULL 거부를 확인하므로 DB 생성·삭제 권한이 필요합니다. `ProductStoresIntegrationTest`는 품절 필터·상품별 분리·빈 결과·공유 찜 반영, 상품 목록과 동일한 상단 상품 정보 및 매장 수 증가에도 SELECT가 2회인지 확인합니다. `ProductListIntegrationTest`는 빈 검증 DB에 자체 상품 데이터를 준비해 전체·검색·정렬·특수문자·표시 경계값·저장된 이미지 URL 반환·좋아요 변경 후 재조회를 확인합니다. 위 전체 migration 검증과 별도로, 기존 V1 데이터의 이미지를 준비한 뒤 V2를 적용해 데이터 보존도 확인해야 합니다.
 
 ## 코드와 컨벤션
 

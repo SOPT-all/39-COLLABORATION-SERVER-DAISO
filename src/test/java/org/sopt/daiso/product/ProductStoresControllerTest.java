@@ -12,6 +12,7 @@ import org.sopt.daiso.global.exception.GlobalExceptionHandler;
 import org.sopt.daiso.global.exception.InventoryStorageExceptionHandler;
 import org.sopt.daiso.product.controller.ProductStoresController;
 import org.sopt.daiso.product.dto.ProductStoreResponse;
+import org.sopt.daiso.product.dto.ProductListItemResponse;
 import org.sopt.daiso.product.dto.ProductStoresResponse;
 import org.sopt.daiso.product.service.ProductService;
 import org.sopt.daiso.store.entity.BusinessStatus;
@@ -39,10 +40,17 @@ class ProductStoresControllerTest {
 
     @Test
     void defaultsToExcludingSoldOutAndReturnsContractFields() throws Exception {
-        when(service.findStores(1001, true)).thenReturn(new ProductStoresResponse(1001L, List.of(
+        when(service.findStores(1001, true)).thenReturn(new ProductStoresResponse(1001L, product(1001), List.of(
                 new ProductStoreResponse(201L, "강남본점", "https://example.com/store.png", BusinessStatus.OPEN, true, 850, 12, false))));
         mvc.perform(get("/api/v1/products/1001/stores"))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.product.productId").value(1001))
+                .andExpect(jsonPath("$.data.product.productNumber").value("1075034"))
+                .andExpect(jsonPath("$.data.product.name").value("상품"))
+                .andExpect(jsonPath("$.data.product.price").value("5,000원"))
+                .andExpect(jsonPath("$.data.product.imageUrl").value("https://example.com/product.png"))
+                .andExpect(jsonPath("$.data.product.reviewCount").value("9999+"))
+                .andExpect(jsonPath("$.data.product.liked").value(true))
                 .andExpect(content().json("""
                         {"code":"SUCCESS","message":"상품의 매장별 재고가 조회되었습니다.",
                         "data":{"productId":1001,"stores":[{"storeId":201,"storeName":"강남본점",
@@ -55,7 +63,7 @@ class ProductStoresControllerTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void acceptsOnlyBooleanFilterAndReturnsEmptyArray(boolean soldOut) throws Exception {
-        when(service.findStores(1001, soldOut)).thenReturn(new ProductStoresResponse(1001L, List.of()));
+        when(service.findStores(1001, soldOut)).thenReturn(new ProductStoresResponse(1001L, product(1001), List.of()));
         mvc.perform(get("/api/v1/products/1001/stores").param("soldOut", String.valueOf(soldOut)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.stores").isEmpty());
         verify(service).findStores(1001, soldOut);
@@ -93,7 +101,7 @@ class ProductStoresControllerTest {
     @ParameterizedTest
     @ValueSource(longs = {1, Long.MAX_VALUE})
     void acceptsInt64Boundaries(long id) throws Exception {
-        when(service.findStores(id, true)).thenReturn(new ProductStoresResponse(id, List.of()));
+        when(service.findStores(id, true)).thenReturn(new ProductStoresResponse(id, product(id), List.of()));
         mvc.perform(get("/api/v1/products/{id}/stores", id))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.productId").value(id));
     }
@@ -124,7 +132,7 @@ class ProductStoresControllerTest {
     @CsvSource({"0, 0m", "850, 850m", "999, 999m", "1000, 1km", "1001, 1km",
             "1500, 1.5km", "1549, 1.5km", "1550, 1.6km", "2000, 2km", "12500, 12.5km"})
     void returnsDisplayDistanceAndPreservesMeters(long meters, String distance) throws Exception {
-        when(service.findStores(1001, true)).thenReturn(new ProductStoresResponse(1001L, List.of(
+        when(service.findStores(1001, true)).thenReturn(new ProductStoresResponse(1001L, product(1001), List.of(
                 new ProductStoreResponse(201L, "매장", "store.png", BusinessStatus.OPEN, false, meters, 1, false))));
         mvc.perform(get("/api/v1/products/1001/stores"))
                 .andExpect(status().isOk())
@@ -133,7 +141,7 @@ class ProductStoresControllerTest {
     }
     @Test
     void returnsClosedSoldOutAndPickupUnsupportedValues() throws Exception {
-        when(service.findStores(1001, false)).thenReturn(new ProductStoresResponse(1001L, List.of(
+        when(service.findStores(1001, false)).thenReturn(new ProductStoresResponse(1001L, product(1001), List.of(
                 new ProductStoreResponse(201L, "매장", "store.png", BusinessStatus.CLOSED, false, 850, 0, false))));
         mvc.perform(get("/api/v1/products/1001/stores").param("soldOut", "false"))
                 .andExpect(status().isOk())
@@ -145,5 +153,10 @@ class ProductStoresControllerTest {
         mvc.perform(get("/api/v1/products/1001/stores"))
                 .andExpect(status().is(status)).andExpect(jsonPath("$.code").value(code))
                 .andExpect(jsonPath("$.message").value(message)).andExpect(jsonPath("$.data").doesNotExist());
+    }
+
+    private ProductListItemResponse product(long id) {
+        return new ProductListItemResponse(id, "1075034", "상품", "5,000원",
+                "https://example.com/product.png", "9999+", true);
     }
 }

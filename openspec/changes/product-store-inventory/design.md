@@ -13,7 +13,7 @@
 ## Decisions
 
 - 완성된 Product의 목록·검색·좋아요 기능을 재사용하고 StoreInventory를 매핑한다. 재고의 상품·매장 참조는 LAZY 관계로 둔다.
-- Product 존재 확인 후 JPQL 생성자 projection으로 매장·재고를 한 번에 조회한다. 엔티티 순회 방식의 N+1을 피한다.
+- Product를 findById로 조회하고 기존 ProductListItemResponse로 변환하여 상단 상품 정보를 함께 반환한다. JPQL 생성자 projection으로 매장·재고를 한 번에 조회해 전체 SELECT 2회를 유지하고 엔티티 순회 방식의 N+1을 피한다. 매장 결과가 비어도 상품 정보를 포함한다.
 - Service는 readOnly 트랜잭션을 사용한다. HTTP 입력은 요청 DTO에서 엄격히 검증한다.
 - 목록·좋아요와 분리한 재고 조회 Controller에 한정한 global advice로 연결·트랜잭션 시작 실패·타임아웃을 503으로 변환한다. 기존 상품 목록·좋아요 및 매장 찜 API의 500 계약은 유지한다.
 - 상품 가격·리뷰 수는 기존 INT를 유지한다. 매장 이미지·재고 NULL은 사용자 지시에 따라 실패시킨다. V3는 ALTER TABLE만 사용하며 MySQL strict SQL mode에서 기존 NULL이 있으면 해당 ALTER를 실패시키고 자동 보정하지 않는다.

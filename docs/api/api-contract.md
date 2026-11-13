@@ -233,6 +233,7 @@ GET /api/v1/products/1001/stores?soldOut=false
 | 응답 필드 | 타입 | 설명 |
 | --- | --- | --- |
 | data.productId | BIGINT | 상품 ID |
+| data.product | Object | 상단 상품 정보. [상품 목록](#6-상품-목록-조회)의 상품 항목과 동일한 필드·타입·표시 형식이며 productId는 data.productId와 일치 |
 | data.stores | Array<Object> | 조건에 맞는 매장 재고 목록 |
 | data.stores[].storeId | BIGINT | 매장 고유 ID |
 | data.stores[].storeName | String | 매장명 |
@@ -244,7 +245,7 @@ GET /api/v1/products/1001/stores?soldOut=false
 | data.stores[].stockQuantity | INT | 필수 재고 수량. 0은 품절이며 프론트에서 품절 표시 |
 | data.stores[].pickupAvailable | Boolean | true: 픽업 지원, false: 픽업 미지원. 재고 유무와 독립 |
 
-성공 응답: `200 OK`, 아래는 `soldOut=false` 예시다.
+성공 응답: `200 OK`, 아래는 `soldOut=false` 예시다. 조건에 맞는 매장이 없어도 `product`는 반환하고 `stores`만 빈 배열로 반환한다.
 
 ```json
 {
@@ -252,6 +253,15 @@ GET /api/v1/products/1001/stores?soldOut=false
   "message": "상품의 매장별 재고가 조회되었습니다.",
   "data": {
     "productId": 1001,
+    "product": {
+      "productId": 1001,
+      "productNumber": "1075034",
+      "name": "상품명",
+      "price": "5,000원",
+      "imageUrl": "https://example.com/product.png",
+      "reviewCount": "23",
+      "liked": false
+    },
     "stores": [
       {
         "storeId": 201,

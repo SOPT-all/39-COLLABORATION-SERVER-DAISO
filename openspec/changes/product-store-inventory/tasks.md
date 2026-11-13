@@ -14,6 +14,8 @@
 
 - [x] 2.5 영업 상태를 Enum으로 매핑하고 VARCHAR 유지·영업 상태·재고 0·픽업 미지원 응답을 HTTP 및 MySQL 테스트로 검증한다.
 
+- [x] 2.6 기존 ProductListItemResponse를 재사용해 상단 상품 정보를 재고 응답에 포함한다. 빈 매장 결과에서도 상품 정보를 반환하고 기존 404·품절 필터·SELECT 2회 및 상품 표시 형식을 검증한다. API 계약·현재 명세를 갱신한다.
+
 ## 3. 통합 검증
 
 - [x] 3.1 bootJar·전체 테스트·OpenSpec strict·문서 링크·diff 검증을 수행한다.

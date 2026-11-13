@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -33,6 +34,7 @@ class ProductStoresIntegrationTest {
     @Autowired private JdbcTemplate jdbc;
     @Autowired private ProductService service;
     @Autowired private EntityManagerFactory entityManagerFactory;
+    @Autowired private ObjectMapper objectMapper;
     private final List<Long> products = new ArrayList<>();
     private final List<Long> stores = new ArrayList<>();
     private long productId;
@@ -68,6 +70,13 @@ class ProductStoresIntegrationTest {
     void defaultsToAvailableStoresAndSeparatesOtherProducts() throws Exception {
         mvc.perform(get("/api/v1/products/{id}/stores", productId))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.data.stores", hasSize(1)))
+                .andExpect(jsonPath("$.data.productId").value(productId))
+                .andExpect(jsonPath("$.data.product.productId").value(productId))
+                .andExpect(jsonPath("$.data.product.name").value("상품"))
+                .andExpect(jsonPath("$.data.product.price").value("1,000원"))
+                .andExpect(jsonPath("$.data.product.imageUrl").value("https://example.com/product.png"))
+                .andExpect(jsonPath("$.data.product.reviewCount").value("23"))
+                .andExpect(jsonPath("$.data.product.liked").value(false))
                 .andExpect(jsonPath("$.data.stores[0].storeId").value(availableStore))
                 .andExpect(jsonPath("$.data.stores[0].imageUrl").value("https://example.com/store.png"))
                 .andExpect(jsonPath("$.data.stores[0].businessStatus").value("OPEN"))
@@ -88,10 +97,29 @@ class ProductStoresIntegrationTest {
     @Test
     void returnsEmptyForNoInventoryOrOnlySoldOut() throws Exception {
         mvc.perform(get("/api/v1/products/{id}/stores", emptyProductId))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.data.stores").isEmpty());
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.stores").isEmpty())
+                .andExpect(jsonPath("$.data.product.productId").value(emptyProductId));
         jdbc.update("UPDATE store_inventory SET stock_quantity = 0 WHERE product_id = ?", productId);
         mvc.perform(get("/api/v1/products/{id}/stores", productId))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.data.stores").isEmpty());
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.stores").isEmpty())
+                .andExpect(jsonPath("$.data.product.productId").value(productId));
+    }
+
+    @Test
+    void returnsSameCurrentProductAsProductList() throws Exception {
+        jdbc.update("UPDATE product SET price = 5000, review_count = 10000, is_liked = TRUE WHERE id = ?", productId);
+        String number = jdbc.queryForObject("SELECT product_number FROM product WHERE id = ?", String.class, productId);
+        String list = mvc.perform(get("/api/v1/products").param("keyword", number))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.products.length()").value(1))
+                .andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        String inventory = mvc.perform(get("/api/v1/products/{id}/stores", productId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.product.price").value("5,000원"))
+                .andExpect(jsonPath("$.data.product.reviewCount").value("9999+"))
+                .andExpect(jsonPath("$.data.product.liked").value(true))
+                .andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        assertThat(objectMapper.readTree(inventory).path("data").path("product"))
+                .isEqualTo(objectMapper.readTree(list).path("data").path("products").get(0));
     }
 
     @Test

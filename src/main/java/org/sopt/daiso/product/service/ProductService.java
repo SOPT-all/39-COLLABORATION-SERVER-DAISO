@@ -25,10 +25,10 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductStoresResponse findStores(long productId, boolean soldOut) {
-        if (!productRepository.existsById(productId)) {
-            throw new CustomException(ErrorType.PRODUCT_NOT_FOUND);
-        }
-        return new ProductStoresResponse(productId, inventoryRepository.findStores(productId, soldOut));
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorType.PRODUCT_NOT_FOUND));
+        return new ProductStoresResponse(productId, ProductListItemResponse.from(product),
+                inventoryRepository.findStores(productId, soldOut));
     }
 
     @Transactional(readOnly = true)
