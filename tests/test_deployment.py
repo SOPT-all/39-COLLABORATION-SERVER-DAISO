@@ -128,6 +128,14 @@ if 'up' in args and args[-1]=='backend' and os.environ.get('FAIL_NEW') and os.en
         self.assertFalse(any('up' in args and args[-1]=='backend' and image==self.old_image for args,image in calls))
 
     @unittest.skipUnless(os.uname().sysname == 'Linux', 'Run shell tests in Linux container')
+    def test_missing_migration_sources_never_auto_restores(self):
+        for release in (self.old,self.new):
+            shutil.rmtree(release/'src/main/resources/db/migration')
+        result,calls = self.run_deploy(FAIL_NEW='1')
+        self.assertNotEqual(result.returncode,0)
+        self.assertFalse(any('up' in args and args[-1]=='backend' and image==self.old_image for args,image in calls))
+
+    @unittest.skipUnless(os.uname().sysname == 'Linux', 'Run shell tests in Linux container')
     def test_first_or_migration_change_never_auto_restores(self):
         for first in (False,True):
             with self.subTest(first=first):

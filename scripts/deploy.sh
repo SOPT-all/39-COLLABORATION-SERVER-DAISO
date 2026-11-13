@@ -38,7 +38,10 @@ if before_history=$(db_history); then history_known=true; fi
 # No automatic rollback across migration changes, including uncertain/first deployments.
 can_restore=false
 if [[ -n $previous && -f $previous/docker-compose.prod.yml && -n $previous_image ]]; then
-  if [[ $(migration_hash "$previous") == "$(migration_hash "$release")" ]]; then can_restore=true; fi
+  if previous_hash=$(migration_hash "$previous") && next_hash=$(migration_hash "$release") &&
+    [[ $previous_hash == "$next_hash" ]]; then
+    can_restore=true
+  fi
 fi
 if "${compose[@]}" up -d --no-deps --wait --wait-timeout 420 backend; then
   printf '%s\n' "$previous_image" > "$base/state/previous-image"
