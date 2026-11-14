@@ -1,0 +1,58 @@
+# Deployment only. Local development continues to use docker-compose.yml.
+name: daiso-prod
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: '3'
+services:
+  mysql:
+    image: mysql:8.4
+    platform: linux/arm64
+    restart: unless-stopped
+    mem_limit: 320m
+    memswap_limit: 576m
+    logging: *logging
+    command: [--innodb-buffer-pool-size=64M, --max-connections=20, --performance-schema=OFF]
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-daiso}
+      MYSQL_USER: ${MYSQL_USER:-daiso}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD}
+      TZ: Asia/Seoul
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: [CMD-SHELL, 'MYSQL_PWD="$$MYSQL_PASSWORD" mysql --protocol=TCP -h 127.0.0.1 -u"$$MYSQL_USER" "$$MYSQL_DATABASE" -e "SELECT 1" >/dev/null 2>&1']
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+  backend:
+    image: ${BACKEND_IMAGE:?Set immutable BACKEND_IMAGE digest}
+    platform: linux/arm64
+    restart: unless-stopped
+    mem_limit: 384m
+    memswap_limit: 768m
+    logging: *logging
+    ports:
+      - '${APP_BIND:-0.0.0.0}:${APP_PORT:-8088}:8088'
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-daiso}
+      MYSQL_USER: ${MYSQL_USER:-daiso}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD}
+      JAVA_TOOL_OPTIONS: -Xms64m -Xmx192m
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: '5'
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: '1'
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, curl, --fail, --silent, --max-time, '4', 'http://127.0.0.1:8088/actuator/health']
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+volumes:
+  mysql-data:

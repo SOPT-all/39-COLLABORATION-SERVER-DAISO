@@ -1,0 +1,18 @@
+schema: spec-driven
+
+context: |
+  Spring Boot Java 21 backend. The application uses Gradle, MySQL and Flyway.
+  Write artifacts in Korean; retain OpenSpec structural headings and SHALL/MUST keywords in English.
+  docs/development.md owns development rules and validation.
+  docs/api/api-contract.md owns HTTP paths, request/response fields and error contracts; it is currently Draft.
+  docs/adr/ owns significant decisions and rationale, not living conventions.
+  Do not promote Draft APIs or unimplemented proposals into current specs.
+
+rules:
+  specs:
+    - Describe behavior and scenarios; link API contract details instead of copying field tables or examples.
+  design:
+    - Link current development rules and related ADRs; do not duplicate them.
+    - Record durable significant decisions in ADRs and link them; keep this design scoped to the change.
+  tasks:
+    - Include applicable tests, API contract updates and spec consistency checks.
