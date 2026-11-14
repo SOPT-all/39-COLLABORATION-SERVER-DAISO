@@ -87,7 +87,7 @@ ADR 검사에서 ADR011은 [ADR 목록의 원문 누락 항목](adr/README.md#ad
 
 1. AWS 생성·권한·비용·접근 범위를 확인받고 서울 ARM64 Ubuntu 24.04 서버와 SSM 연결을 준비한다. GitHub Environment main 제한과 OIDC 신뢰 조건을 함께 확인한다.
 2. 서버 초기 변경을 확인받은 뒤 해당 커밋의 `scripts/bootstrap-server.sh`를 root로 `bash scripts/bootstrap-server.sh --approved` 실행한다. Docker·Compose·SSM Agent, 스왑 1GiB·재부팅 유지·swappiness 10과 `/opt/daiso`를 준비한다. 기존 스왑이 다르면 덮어쓰지 않고 중단한다. 이 인자는 실제 사용자 승인을 대신하지 않는다.
-3. 승인받은 대화형 서버 세션에서 사용자가 `.env`와 root의 GHCR 인증을 준비한다. 비밀값은 채팅·저장소·Run Command 인자에 넣지 않는다. 세션 기록 설정도 먼저 확인하고 환경 파일은 root 소유 600, Docker 인증 파일은 root만 읽도록 제한한다. 인증 파일은 암호화된 비밀 저장소가 아니다.
+3. 승인받은 대화형 서버 세션에서 사용자가 `.env`를 준비한다. 공개 GHCR 이미지는 별도 로그인 없이 내려받는다. 비밀값은 채팅·저장소·Run Command 인자에 넣지 않는다. 세션 기록 설정도 먼저 확인하고 환경 파일은 root 소유 600으로 제한한다.
 4. 새 DB의 schema는 기존 Flyway로 생성한다. 더미 데이터는 별도 확인 후 [기존 SQL 절차](#개발용-더미-데이터)를 배포 Compose 경로·프로젝트에 맞춰 한 번만 수행한다. 자동 배포는 더미를 삽입하지 않는다.
 
 ### 배포와 확인

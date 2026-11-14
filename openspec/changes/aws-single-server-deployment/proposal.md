@@ -28,5 +28,5 @@
 - [이슈 #18](https://github.com/SOPT-all/39-COLLABORATION-SERVER-DAISO/issues/18), 브랜치 `chore/18-aws-deployment`, 조사 기준 `dev`의 `ca03701`.
 - `.github/workflows/ci.yml`·`cd.yml`, 배포용 Compose·서버 준비 및 배포 스크립트가 구현 대상이다. 기존 Dockerfile은 ARM64 지원을 확인해 재사용한다.
 - README는 실제 배포 진입점·설정값, [개발 가이드](../../../docs/development.md)는 배포·검증·복구 절차를 구현 후 갱신한다. 현재 SSH 설명을 미리 완료 상태로 바꾸지 않는다.
-- AWS EC2·EBS·Elastic IP·보안그룹·IAM/OIDC, GitHub Environment와 GHCR 설정이 관련된다. 아직 생성·수정하지 않았다.
+- AWS EC2·EBS·Elastic IP·보안그룹·IAM/OIDC, GitHub Environment와 GHCR 설정이 관련된다. 실제 준비·검증 상태는 작업 목록에서 관리한다.
 - 상세 후보값·승인 단계는 [설계](design.md), 완료 판정은 [작업 목록](tasks.md)을 따른다.
