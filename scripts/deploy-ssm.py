@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Send one immutable deployment, wait for final status, never print remote logs."""
+"""Send a fixed deployment or demo reset, await final status, never print remote logs."""
+import argparse
 import json
 import os
 import re
@@ -17,17 +18,25 @@ def aws(*args):
     return json.loads(result.stdout)
 
 
-def main():
+def main(reset_demo=False):
     instance = os.environ['INSTANCE_ID']
     sha = os.environ['GITHUB_SHA']
     repo = os.environ['GITHUB_REPOSITORY']
-    image = os.environ['BACKEND_IMAGE']
+    image = os.environ.get('BACKEND_IMAGE', '')
     if not re.fullmatch(r'i-[0-9a-f]{17}', instance):
         raise ValueError('Invalid instance ID')
     if not re.fullmatch(r'[0-9a-f]{40}', sha) or not re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+', repo):
         raise ValueError('Invalid release source')
     image_name = 'ghcr.io/sungkong00/39-collaboration-server-daiso'
-    if not re.fullmatch(re.escape(image_name) + r'@sha256:[0-9a-f]{64}', image):
+    if reset_demo:
+        if (os.environ.get('GITHUB_REF') != 'refs/heads/main'
+                or os.environ.get('GITHUB_EVENT_NAME') != 'workflow_dispatch'
+                or os.environ.get('CONFIRM_RESET') != 'true'):
+            raise ValueError('Demo reset requires a confirmed manual run on main')
+        entrypoint = 'bash "$release/scripts/reset-demo-data.sh" --confirmed'
+    else:
+        entrypoint = f'bash "$release/scripts/deploy.sh" \'{image}\''
+    if not reset_demo and not re.fullmatch(re.escape(image_name) + r'@sha256:[0-9a-f]{64}', image):
         raise ValueError('Image must use the configured personal GHCR package and a digest')
     # Repository is public. No credentials or .env contents enter SSM command history.
     command = f'''set -eu
@@ -43,7 +52,7 @@ if [ ! -d "$release" ]; then
   tar -xzf "$stage/source.tar.gz" -C "$stage/source" --strip-components=1
   mv "$stage/source" "$release"
 fi
-bash "$release/scripts/deploy.sh" '{image}'
+{entrypoint}
 '''
     response = aws('send-command', '--instance-ids', instance, '--document-name', 'AWS-RunShellScript',
                    '--timeout-seconds', '120', '--parameters', json.dumps({'commands': [command], 'executionTimeout': ['1500']}))
@@ -54,12 +63,14 @@ bash "$release/scripts/deploy.sh" '{image}'
         result = aws('get-command-invocation', '--command-id', command_id, '--instance-id', instance)
         if result and result['Status'] not in ('Pending', 'InProgress', 'Delayed', 'Cancelling'):
             if result['Status'] == 'Success' and result['ResponseCode'] == 0:
-                print('SSM deployment completed.')
+                print('SSM operation completed.')
                 return
-            raise RuntimeError(f"SSM deployment failed: {result['Status']}; inspect command {command_id}.")
+            raise RuntimeError(f"SSM operation failed: {result['Status']}; inspect command {command_id}.")
         time.sleep(10)
     raise TimeoutError(f'SSM completion unconfirmed: {command_id}; check before retrying.')
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--reset-demo', action='store_true')
+    main(reset_demo=parser.parse_args().reset_demo)

@@ -60,8 +60,9 @@ jobs:
           python3 scripts/check-test-results.py
       - name: Check deployment logic
         run: |
-          bash -n scripts/bootstrap-server.sh scripts/deploy.sh
+          bash -n scripts/bootstrap-server.sh scripts/deploy.sh scripts/reset-demo-data.sh scripts/render-reset-sql.sh
           python3 -m unittest discover -s tests -p 'test_deployment.py'
+          python3 tests/test_demo_reset.py
       - name: Set image name
         id: image
         run: echo "name=ghcr.io/sungkong00/39-collaboration-server-daiso" >> "$GITHUB_OUTPUT"

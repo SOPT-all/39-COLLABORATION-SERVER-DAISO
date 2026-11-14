@@ -34,6 +34,21 @@ class SsmDeploymentTest(unittest.TestCase):
         self.assertIn('https://api.github.com/repos/SOPT-all/39-COLLABORATION-SERVER-DAISO/tarball/' + 'a' * 40, command)
         self.assertIn(os.environ['BACKEND_IMAGE'], command)
 
+    def test_reset_requires_confirmed_main_dispatch(self):
+        valid = dict(GITHUB_REF='refs/heads/main', GITHUB_EVENT_NAME='workflow_dispatch', CONFIRM_RESET='true')
+        for key, value in [('GITHUB_REF', 'refs/heads/dev'), ('GITHUB_EVENT_NAME', 'push'), ('CONFIRM_RESET', 'false')]:
+            with self.subTest(key=key), patch.dict(os.environ, dict(valid, **{key: value})), patch.object(ssm, 'aws') as call:
+                with self.assertRaises(ValueError):
+                    ssm.main(reset_demo=True)
+                call.assert_not_called()
+        with patch.dict(os.environ, valid), patch.object(ssm, 'aws', side_effect=[
+                {'Command': {'CommandId': 'cmd'}}, {'Status': 'Success', 'ResponseCode': 0}]) as call:
+            ssm.main(reset_demo=True)
+            command = ' '.join(call.call_args_list[0].args)
+            self.assertIn('reset-demo-data.sh', command)
+            self.assertNotIn('scripts/deploy.sh', command)
+            self.assertNotIn('ghcr.io', command)
+
     def test_failure_or_nonzero_success_is_failure(self):
         for status, code in [('Failed', 1), ('TimedOut', -1), ('Cancelled', -1), ('Success', 1)]:
             with self.subTest(status=status), patch.object(ssm, 'aws', side_effect=[
@@ -105,6 +120,30 @@ if 'up' in args and args[-1]=='backend' and os.environ.get('FAIL_NEW') and os.en
         calls = [json.loads(line) for line in (self.root/'calls').read_text().splitlines()]
         self.assertFalse(any('down' in args or 'prune' in args for args,_ in calls))
         return result,calls
+
+    @unittest.skipUnless(os.uname().sysname == 'Linux', 'Run shell tests in Linux container')
+    def test_reset_resumes_existing_app_even_when_sql_fails(self):
+        source = Path(__file__).resolve().parents[1] / 'scripts'
+        for name in ('reset-demo-data.sh', 'render-reset-sql.sh', 'seed-dummy-data.sql'):
+            shutil.copy(source / name, self.new / 'scripts' / name)
+        docker = self.root / 'bin/docker'
+        docker.write_text(docker.read_text() + "\nif 'ps' in args: print('container-id')\n"
+                          + "if args[0]=='inspect': print('healthy')\n"
+                          + "if 'exec' in args:\n"
+                          + " if os.environ.get('FAIL_SQL'): sys.exit(1)\n"
+                          + " print('15\\t8\\t120')\n")
+        for failure in (False, True):
+            with self.subTest(failure=failure):
+                (self.root / 'calls').write_text('')
+                env = dict(self.env, **({'FAIL_SQL': '1'} if failure else {}))
+                result = subprocess.run(['bash', str(self.new/'scripts/reset-demo-data.sh'), '--confirmed'],
+                                        env=env, capture_output=True, text=True)
+                self.assertEqual(result.returncode == 0, not failure, result.stderr)
+                calls = [json.loads(line)[0] for line in (self.root/'calls').read_text().splitlines()]
+                self.assertTrue(any('stop' in args for args in calls))
+                self.assertTrue(any('start' in args for args in calls))
+                self.assertFalse(any('up' in args or 'pull' in args or 'down' in args for args in calls))
+                self.assertNotIn('not-for-logs', result.stdout + result.stderr)
 
     @unittest.skipUnless(os.uname().sysname == 'Linux', 'Run shell tests in Linux container')
     def test_success_records_release(self):
