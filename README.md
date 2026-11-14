@@ -46,6 +46,7 @@ IntelliJ의 Project SDK와 Gradle JVM도 Java 21로 맞춥니다. Wrapper의 실
 
 - `ci.yml`: `dev`·`main` 대상 PR에서 ARM64 runner·Java 21·일회용 MySQL로 전체 테스트와 JAR·이미지 빌드를 검사합니다. 실패하거나 건너뛴 테스트가 있으면 통과하지 않습니다.
 - `cd.yml`: `main` push 시 같은 검사를 재사용하고 검증된 JAR의 이미지를 GHCR에 게시합니다. OIDC·SSM으로 지정 EC2에 digest가 고정된 이미지를 배포한 뒤 외부 health·Swagger·API를 확인합니다.
+- `reset-demo-data.yml`: main 수동 실행과 확인 체크로 기존 데모 데이터셋을 복원합니다. 사용 조건·중단 시간·검증은 [데모 초기화](docs/development.md#데모-데이터-초기화)를 참고합니다.
 - `docker-compose.prod.yml`: Spring·MySQL을 함께 실행합니다. MySQL 포트는 외부에 공개하지 않고 DB 볼륨을 유지합니다. 로컬 Compose와 별개입니다.
 - 새 GitHub Environment `practice-production`에 **main만 배포 허용**을 설정하고 Variables `AWS_ROLE_ARN`, `INSTANCE_ID`, `BASE_URL`을 등록합니다. 현재 배포 환경에는 세 변수를 등록했고 main 브랜치만 허용했습니다. `BASE_URL`은 후행 `/` 없는 주소(예: `http://고정IP:8088`)입니다. AWS OIDC 신뢰도 이 저장소·Environment로 제한합니다.
 - 서버에는 `/opt/daiso/.env`를 root 소유·권한 600으로 준비합니다. 필수값은 `MYSQL_PASSWORD`, `MYSQL_ROOT_PASSWORD`, 기본값은 `MYSQL_DATABASE=daiso`, `MYSQL_USER=daiso`입니다. 앱 포트는 8088이며 DB·비밀번호는 이미지에 포함하지 않습니다.
