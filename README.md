@@ -40,14 +40,20 @@ IntelliJ의 Project SDK와 Gradle JVM도 Java 21로 맞춥니다. Wrapper의 실
 
 요청에 필요한 ID는 조회 결과의 값을 사용합니다. 좋아요·매장 찜을 실행하면 실제 공유 상태가 변경됩니다. 필드·오류의 원본은 [API 계약](docs/api/api-contract.md), 문서 수정·검증 기준은 [개발 가이드](docs/development.md#swagger-문서)를 참고합니다.
 
-## GitHub Actions
+## GitHub Actions와 배포 준비
 
-- `ci.yml`: `dev`·`main` 대상 PR에서 Java 21로 `clean bootJar`를 실행합니다. 테스트는 실행하지 않는 JAR 빌드 검사입니다.
-- `cd.yml`: `main` push 시 Docker 이미지를 GHCR에 게시하고 SSH로 서버에 배포합니다.
-- 서버의 `~/apps/daiso/.env`에 MySQL 설정을 준비합니다. 배포 시 기존 `docker-compose.yml`로 MySQL을 실행하고 Spring은 `docker run`으로 실행합니다.
-- 필요한 GitHub Secrets: `DEPLOY_HOST`, `DEPLOY_PORT`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS`, `GHCR_USERNAME`, `GHCR_PAT`.
+이 브랜치에는 SSM 배포 코드가 있으며 **EC2·SSM·서버 초기 설정과 AWS OIDC·GitHub Environment 연결은 준비했습니다. SSM 세션에서 첫 배포를 완료하고 외부 health·Swagger·상품 목록 응답을 확인했습니다. main 자동 배포는 아직 검증하지 않았습니다.** 서버 생성·권한·초기 설정·자동 배포 활성화는 각각 사용자 확인 후 진행합니다.
 
-CI의 JAR 빌드 성공은 DB 연결이나 Flyway migration 검증 성공을 의미하지 않습니다.
+- `ci.yml`: `dev`·`main` 대상 PR에서 ARM64 runner·Java 21·일회용 MySQL로 전체 테스트와 JAR·이미지 빌드를 검사합니다. 실패하거나 건너뛴 테스트가 있으면 통과하지 않습니다.
+- `cd.yml`: `main` push 시 같은 검사를 재사용하고 검증된 JAR의 이미지를 GHCR에 게시합니다. OIDC·SSM으로 지정 EC2에 digest가 고정된 이미지를 배포한 뒤 외부 health·Swagger·API를 확인합니다.
+- `reset-demo-data.yml`: main 수동 실행과 확인 체크로 기존 데모 데이터셋을 복원합니다. 사용 조건·중단 시간·검증은 [데모 초기화](docs/development.md#데모-데이터-초기화)를 참고합니다.
+- `docker-compose.prod.yml`: Spring·MySQL을 함께 실행합니다. MySQL 포트는 외부에 공개하지 않고 DB 볼륨을 유지합니다. 로컬 Compose와 별개입니다.
+- 새 GitHub Environment `practice-production`에 **main만 배포 허용**을 설정하고 Variables `AWS_ROLE_ARN`, `INSTANCE_ID`, `BASE_URL`을 등록합니다. 현재 배포 환경에는 세 변수를 등록했고 main 브랜치만 허용했습니다. `BASE_URL`은 후행 `/` 없는 주소(예: `http://고정IP:8088`)입니다. AWS OIDC 신뢰도 이 저장소·Environment로 제한합니다.
+- 서버에는 `/opt/daiso/.env`를 root 소유·권한 600으로 준비합니다. 필수값은 `MYSQL_PASSWORD`, `MYSQL_ROOT_PASSWORD`, 기본값은 `MYSQL_DATABASE=daiso`, `MYSQL_USER=daiso`입니다. 앱 포트는 8088이며 DB·비밀번호는 이미지에 포함하지 않습니다.
+- 이미지 주소는 개인 계정의 `ghcr.io/sungkong00/39-collaboration-server-daiso`입니다. 팀 코드 저장소와 AWS OIDC 대상은 그대로 유지합니다. 조직의 패키지 공개 제한 때문에 개인 GHCR을 선택했으며, 서버는 공개 이미지를 인증 없이 받습니다. 현재 첫 ARM64 이미지 게시·패키지 공개 전환·로컬에서 인증 없는 pull을 확인했습니다. 새 패키지를 만들 때도 공개 전환과 익명 pull을 확인합니다. 저장소 공개 여부와 패키지 공개 여부는 별개입니다.
+- 게시 인증은 `SungKong00`의 classic PAT(`write:packages`, `repo` 권한 제외)를 저장소 Actions Secret `GHCR_PUBLISH_TOKEN`에 등록합니다. 빌드 작업에서 사용하므로 Environment Secret이 아닌 **Repository Secret**입니다. `cd.yml`이 재사용 CI에 명시적으로 전달하며 PR 검사는 토큰 없이 수행합니다. 토큰 만료·폐기 시 같은 Secret을 교체합니다. AWS 인증은 별도의 OIDC이며 서버에는 이 토큰을 저장하지 않습니다. 기존 팀 Secrets는 변경하지 않습니다.
+
+서버 초기 준비·배포·실패 복구·종료 시 주의사항은 [배포 작업](docs/development.md#배포-작업)을 참고합니다. Dockerfile은 `bootJar` 결과물을 복사하므로 로컬 이미지 검사는 `./gradlew bootJar` 후 `docker build --platform linux/arm64 -t daiso:local .` 순서로 실행합니다. 서버에서는 빌드하지 않습니다.
 
 ## 개발 문서
 

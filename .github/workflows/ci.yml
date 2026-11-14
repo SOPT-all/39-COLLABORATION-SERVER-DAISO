@@ -1,31 +1,93 @@
-﻿name: Backend Check
-
+name: Backend Check
 on:
   pull_request:
-    branches:
-      - dev
-      - main
-
+    branches: [dev, main]
+  workflow_call:
+    inputs:
+      publish:
+        type: boolean
+        default: false
+    secrets:
+      GHCR_PUBLISH_TOKEN:
+        description: Personal GHCR classic token with write:packages; needed only for publishing
+        required: false
+    outputs:
+      image:
+        value: ${{ jobs.build.outputs.image }}
 permissions:
   contents: read
-
 jobs:
   build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    outputs:
+      image: ${{ steps.reference.outputs.image }}
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: ci-disposable-only
+          MYSQL_ROOT_HOST: '%'
+          MYSQL_DATABASE: local_test
+        ports: ['3307:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 --silent"
+          --health-interval=5s --health-timeout=5s --health-retries=60
+    env:
+      MYSQL_PORT: '3307'
+      MYSQL_DATABASE: local_test
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ci-disposable-only
+      MIGRATION_DB_URL: jdbc:mysql://127.0.0.1:3307/migration_test?allowPublicKeyRetrieval=true&sslMode=DISABLED
+      MIGRATION_DB_USER: root
+      MIGRATION_DB_PASSWORD: ci-disposable-only
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
           cache: gradle
-
-      - name: Grant execute permission
-        run: chmod +x gradlew
-
-      - name: Build backend
-        run: ./gradlew clean bootJar --no-daemon
+      - name: Prepare isolated migration database
+        env:
+          MYSQL_CONTAINER: ${{ job.services.mysql.id }}
+        run: docker exec -e MYSQL_PWD="$MYSQL_PASSWORD" "$MYSQL_CONTAINER" mysql -uroot -e 'CREATE DATABASE migration_test'
+      - name: Build and run all tests
+        run: |
+          bash ./gradlew clean bootJar test --no-daemon
+          python3 scripts/check-test-results.py
+      - name: Check deployment logic
+        run: |
+          bash -n scripts/bootstrap-server.sh scripts/deploy.sh scripts/reset-demo-data.sh scripts/render-reset-sql.sh
+          python3 -m unittest discover -s tests -p 'test_deployment.py'
+          python3 tests/test_demo_reset.py
+      - name: Set image name
+        id: image
+        run: echo "name=ghcr.io/sungkong00/39-collaboration-server-daiso" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        if: inputs.publish
+        with:
+          registry: ghcr.io
+          username: sungkong00
+          password: ${{ secrets.GHCR_PUBLISH_TOKEN }}
+      - name: Build verified ARM64 image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/arm64
+          push: ${{ inputs.publish == true }}
+          load: ${{ inputs.publish != true }}
+          tags: ${{ steps.image.outputs.name }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Output immutable image
+        id: reference
+        if: inputs.publish
+        env:
+          NAME: ${{ steps.image.outputs.name }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: echo "image=$NAME@$DIGEST" >> "$GITHUB_OUTPUT"
