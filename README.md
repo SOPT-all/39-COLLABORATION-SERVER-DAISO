@@ -49,7 +49,7 @@ IntelliJ의 Project SDK와 Gradle JVM도 Java 21로 맞춥니다. Wrapper의 실
 - `docker-compose.prod.yml`: Spring·MySQL을 함께 실행합니다. MySQL 포트는 외부에 공개하지 않고 DB 볼륨을 유지합니다. 로컬 Compose와 별개입니다.
 - 새 GitHub Environment `practice-production`에 **main만 배포 허용**을 설정하고 Variables `AWS_ROLE_ARN`, `INSTANCE_ID`, `BASE_URL`을 등록합니다. 현재 배포 환경에는 세 변수를 등록했고 main 브랜치만 허용했습니다. `BASE_URL`은 후행 `/` 없는 주소(예: `http://고정IP:8088`)입니다. AWS OIDC 신뢰도 이 저장소·Environment로 제한합니다.
 - 서버에는 `/opt/daiso/.env`를 root 소유·권한 600으로 준비합니다. 필수값은 `MYSQL_PASSWORD`, `MYSQL_ROOT_PASSWORD`, 기본값은 `MYSQL_DATABASE=daiso`, `MYSQL_USER=daiso`입니다. 앱 포트는 8088이며 DB·비밀번호는 이미지에 포함하지 않습니다.
-- GHCR 이미지는 공개로 사용해 서버의 다운로드 인증을 생략합니다. 아직 첫 이미지가 게시되지 않아 공개 전환·익명 pull 검증은 남아 있습니다. 최초에는 서버 배포 없이 이미지를 게시하고 패키지를 공개로 전환한 뒤, 익명 pull을 확인해야 합니다. GitHub 저장소 공개 여부와 패키지 공개 여부는 별개입니다. 기존 팀 Secrets는 삭제·변경하지 않습니다.
+- GHCR 이미지는 공개로 사용해 서버의 다운로드 인증을 생략합니다. 첫 ARM64 이미지 게시와 CI 검사는 완료했지만, 조직 정책이 공개 전환을 막아 현재 패키지는 비공개이며 익명 pull은 401로 거부됩니다. 조직 관리자의 공개 허용 또는 이미지 저장 위치 변경 결정이 필요합니다. 최초에는 서버 배포 없이 이미지를 게시하고 패키지를 공개로 전환한 뒤, 익명 pull을 확인해야 합니다. GitHub 저장소 공개 여부와 패키지 공개 여부는 별개입니다. 기존 팀 Secrets는 삭제·변경하지 않습니다.
 
 서버 초기 준비·배포·실패 복구·종료 시 주의사항은 [배포 작업](docs/development.md#배포-작업)을 참고합니다. Dockerfile은 `bootJar` 결과물을 복사하므로 로컬 이미지 검사는 `./gradlew bootJar` 후 `docker build --platform linux/arm64 -t daiso:local .` 순서로 실행합니다. 서버에서는 빌드하지 않습니다.
 
