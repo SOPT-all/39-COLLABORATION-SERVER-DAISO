@@ -50,4 +50,4 @@ printf 'vm.swappiness=10\n' > /etc/sysctl.d/90-daiso-swap.conf
 sysctl -p /etc/sysctl.d/90-daiso-swap.conf
 install -d -m 700 /opt/daiso /opt/daiso/releases /opt/daiso/state
 swapon --show
-printf 'Prepare /opt/daiso/.env (root:root, 600) and root GHCR login separately. No deployment has been started.\n'
+printf 'Prepare /opt/daiso/.env (root:root, 600). Images must be public; no GHCR login is needed. No deployment has been started.\n'

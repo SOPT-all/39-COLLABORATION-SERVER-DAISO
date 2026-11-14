@@ -17,8 +17,8 @@ spec.loader.exec_module(ssm)
 class SsmDeploymentTest(unittest.TestCase):
     def setUp(self):
         self.env = patch.dict(os.environ, INSTANCE_ID='i-' + '1' * 17, GITHUB_SHA='a' * 40,
-                              GITHUB_REPOSITORY='SOPT-all/example',
-                              BACKEND_IMAGE='ghcr.io/sopt-all/example@sha256:' + 'b' * 64)
+                              GITHUB_REPOSITORY='SOPT-all/39-COLLABORATION-SERVER-DAISO',
+                              BACKEND_IMAGE='ghcr.io/sungkong00/39-collaboration-server-daiso@sha256:' + 'b' * 64)
         self.env.start()
         self.addCleanup(self.env.stop)
 
@@ -31,6 +31,8 @@ class SsmDeploymentTest(unittest.TestCase):
         self.assertNotIn('password', command.lower())
         self.assertIn('a' * 40, command)
         self.assertNotIn('/main', command)
+        self.assertIn('https://api.github.com/repos/SOPT-all/39-COLLABORATION-SERVER-DAISO/tarball/' + 'a' * 40, command)
+        self.assertIn(os.environ['BACKEND_IMAGE'], command)
 
     def test_failure_or_nonzero_success_is_failure(self):
         for status, code in [('Failed', 1), ('TimedOut', -1), ('Cancelled', -1), ('Success', 1)]:
@@ -45,7 +47,9 @@ class SsmDeploymentTest(unittest.TestCase):
 
     def test_bad_target_or_image_never_sends(self):
         for key, value in [('INSTANCE_ID', 'all'), ('GITHUB_SHA', 'main'),
-                           ('BACKEND_IMAGE', 'ghcr.io/other/repo@sha256:' + 'b' * 64)]:
+                           ('BACKEND_IMAGE', 'ghcr.io/other/repo@sha256:' + 'b' * 64),
+                           ('BACKEND_IMAGE', 'ghcr.io/sopt-all/39-collaboration-server-daiso@sha256:' + 'b' * 64),
+                           ('BACKEND_IMAGE', 'ghcr.io/sungkong00/39-collaboration-server-daiso:latest')]:
             with self.subTest(key=key), patch.dict(os.environ, {key: value}), patch.object(ssm, 'aws') as call:
                 with self.assertRaises(ValueError):
                     ssm.main()

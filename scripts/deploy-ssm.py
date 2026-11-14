@@ -26,8 +26,9 @@ def main():
         raise ValueError('Invalid instance ID')
     if not re.fullmatch(r'[0-9a-f]{40}', sha) or not re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+', repo):
         raise ValueError('Invalid release source')
-    if not re.fullmatch(re.escape('ghcr.io/' + repo.lower()) + r'@sha256:[0-9a-f]{64}', image):
-        raise ValueError('Image must belong to this repository and use a digest')
+    image_name = 'ghcr.io/sungkong00/39-collaboration-server-daiso'
+    if not re.fullmatch(re.escape(image_name) + r'@sha256:[0-9a-f]{64}', image):
+        raise ValueError('Image must use the configured personal GHCR package and a digest')
     # Repository is public. No credentials or .env contents enter SSM command history.
     command = f'''set -eu
 umask 077
