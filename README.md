@@ -42,7 +42,7 @@ IntelliJ의 Project SDK와 Gradle JVM도 Java 21로 맞춥니다. Wrapper의 실
 
 ## GitHub Actions와 배포 준비
 
-이 브랜치에는 SSM 배포 코드가 있으며 **EC2·SSM·서버 초기 설정과 AWS OIDC·GitHub Environment 연결은 준비했습니다. 실제 배포는 아직 수행하지 않았습니다.** 서버 생성·권한·초기 설정·자동 배포 활성화는 각각 사용자 확인 후 진행합니다.
+이 브랜치에는 SSM 배포 코드가 있으며 **EC2·SSM·서버 초기 설정과 AWS OIDC·GitHub Environment 연결은 준비했습니다. SSM 세션에서 첫 배포를 완료하고 외부 health·Swagger·상품 목록 응답을 확인했습니다. main 자동 배포는 아직 검증하지 않았습니다.** 서버 생성·권한·초기 설정·자동 배포 활성화는 각각 사용자 확인 후 진행합니다.
 
 - `ci.yml`: `dev`·`main` 대상 PR에서 ARM64 runner·Java 21·일회용 MySQL로 전체 테스트와 JAR·이미지 빌드를 검사합니다. 실패하거나 건너뛴 테스트가 있으면 통과하지 않습니다.
 - `cd.yml`: `main` push 시 같은 검사를 재사용하고 검증된 JAR의 이미지를 GHCR에 게시합니다. OIDC·SSM으로 지정 EC2에 digest가 고정된 이미지를 배포한 뒤 외부 health·Swagger·API를 확인합니다.

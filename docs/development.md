@@ -81,7 +81,7 @@ ADR 검사에서 ADR011은 [ADR 목록의 원문 누락 항목](adr/README.md#ad
 
 ## 배포 작업
 
-연결할 설정값은 [README](../README.md#github-actions와-배포-준비), 미완료 인프라·실서버 검증은 [진행 중인 배포 변경](../openspec/changes/aws-single-server-deployment/proposal.md)에서 확인한다. 현재 AWS 배포 완료 상태가 아니다.
+연결할 설정값은 [README](../README.md#github-actions와-배포-준비), 미완료 인프라·실서버 검증은 [진행 중인 배포 변경](../openspec/changes/aws-single-server-deployment/proposal.md)에서 확인한다. SSM 세션을 통한 첫 배포와 외부 접속은 확인했다. main 자동 배포·재부팅·실패 복구 검증은 남아 있다.
 
 ### 최초 준비
 
