@@ -36,7 +36,7 @@ public class ProductStoresController {
                             useReturnTypeSchema = true, content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
                                     {"code":"SUCCESS","message":"상품의 매장별 재고가 조회되었습니다.","data":{
                                       "productId":1001,"product":{"productId":1001,"productNumber":"0012345","name":"수분 마스크팩",
-                                        "price":"1,000원","imageUrl":"https://example.com/product.png","reviewCount":"9999+","liked":false},
+                                        "price":"1,000","imageUrl":"https://example.com/product.png","reviewCount":"9,999+","liked":false},
                                       "stores":[{"storeId":201,"storeName":"강남본점","imageUrl":"https://example.com/store.png",
                                         "businessStatus":"CLOSED","bookmarked":true,"distanceMeters":1500,"distance":"1.5km",
                                         "stockQuantity":0,"pickupAvailable":false}]}}

@@ -47,9 +47,9 @@ class ProductStoresControllerTest {
                 .andExpect(jsonPath("$.data.product.productId").value(1001))
                 .andExpect(jsonPath("$.data.product.productNumber").value("1075034"))
                 .andExpect(jsonPath("$.data.product.name").value("상품"))
-                .andExpect(jsonPath("$.data.product.price").value("5,000원"))
+                .andExpect(jsonPath("$.data.product.price").value("5,000"))
                 .andExpect(jsonPath("$.data.product.imageUrl").value("https://example.com/product.png"))
-                .andExpect(jsonPath("$.data.product.reviewCount").value("9999+"))
+                .andExpect(jsonPath("$.data.product.reviewCount").value("9,999+"))
                 .andExpect(jsonPath("$.data.product.liked").value(true))
                 .andExpect(content().json("""
                         {"code":"SUCCESS","message":"상품의 매장별 재고가 조회되었습니다.",
@@ -156,7 +156,7 @@ class ProductStoresControllerTest {
     }
 
     private ProductListItemResponse product(long id) {
-        return new ProductListItemResponse(id, "1075034", "상품", "5,000원",
-                "https://example.com/product.png", "9999+", true);
+        return new ProductListItemResponse(id, "1075034", "상품", "5,000",
+                "https://example.com/product.png", "9,999+", true);
     }
 }
