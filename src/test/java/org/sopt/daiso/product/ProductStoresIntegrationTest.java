@@ -73,7 +73,7 @@ class ProductStoresIntegrationTest {
                 .andExpect(jsonPath("$.data.productId").value(productId))
                 .andExpect(jsonPath("$.data.product.productId").value(productId))
                 .andExpect(jsonPath("$.data.product.name").value("상품"))
-                .andExpect(jsonPath("$.data.product.price").value("1,000원"))
+                .andExpect(jsonPath("$.data.product.price").value("1,000"))
                 .andExpect(jsonPath("$.data.product.imageUrl").value("https://example.com/product.png"))
                 .andExpect(jsonPath("$.data.product.reviewCount").value("23"))
                 .andExpect(jsonPath("$.data.product.liked").value(false))
@@ -114,8 +114,8 @@ class ProductStoresIntegrationTest {
                 .andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
         String inventory = mvc.perform(get("/api/v1/products/{id}/stores", productId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.product.price").value("5,000원"))
-                .andExpect(jsonPath("$.data.product.reviewCount").value("9999+"))
+                .andExpect(jsonPath("$.data.product.price").value("5,000"))
+                .andExpect(jsonPath("$.data.product.reviewCount").value("9,999+"))
                 .andExpect(jsonPath("$.data.product.liked").value(true))
                 .andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
         assertThat(objectMapper.readTree(inventory).path("data").path("product"))

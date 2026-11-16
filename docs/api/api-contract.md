@@ -176,7 +176,7 @@ Content-Type: application/json
 - 페이지네이션 없이 조건에 맞는 모든 상품을 ID 오름차순으로 반환한다. 별도 정렬·필터 옵션을 추가하지 않는다.
 - 성공은 `200`, 메시지는 `상품 목록을 조회했습니다.`이며 `data.products` 배열에 productId(BIGINT), productNumber·name·price·imageUrl·reviewCount(String), liked(boolean)를 담는다. 결과가 없으면 빈 배열이다.
 - 응답 항목은 null을 허용하지 않는다. imageUrl에는 실제 상품 이미지 또는 사용자가 준비한 “이미지 없음” 이미지의 URL을 저장하고 그대로 반환한다. API에서 임의의 기본 URL을 생성하거나 null·빈 문자열로 대체하지 않는다. liked는 [공통 정책](#24-상품-좋아요매장-찜)에 따른 저장값이다.
-- price는 서버에서 천 단위 쉼표와 `원`을 포함해 반환한다. reviewCount는 9,999 이하에서 쉼표를 적용하고 9,999 초과일 때만 `9999+`로 반환한다. `개`는 붙이지 않는다.
+- price는 서버에서 천 단위 쉼표를 적용한 문자열로 반환하며 `원` 단위는 포함하지 않는다. reviewCount는 9,999 이하에서 쉼표를 적용하고 9,999 초과일 때만 `9,999+`로 반환한다. `개`는 붙이지 않는다.
 - NEW 배지는 프론트에서 정적으로 표시한다. 별점은 제외하며 두 항목의 서버 필드를 추가하지 않는다.
 
 가격·리뷰 수의 DB 타입은 INT이며 위 문자열은 API 응답의 표시 형식이다. 상품 좋아요의 Product·Repository를 재사용한다. V1은 보존하고 V2와 Product 매핑으로 상품 이미지 NOT NULL을 적용한다. 기존 데이터의 URL 준비와 전환 절차는 [개발 가이드](../development.md#스키마-변경-절차)를 따른다.
@@ -190,10 +190,10 @@ GET /api/v1/products?keyword=마스크팩
 
 | 값 | price 응답 | reviewCount 응답 |
 | --- | --- | --- |
-| 0 | `"0원"` | `"0"` |
-| 1000 | `"1,000원"` | `"1,000"` |
-| 9999 | `"9,999원"` | `"9,999"` |
-| 10000 | `"10,000원"` | `"9999+"` |
+| 0 | `"0"` | `"0"` |
+| 1000 | `"1,000"` | `"1,000"` |
+| 9999 | `"9,999"` | `"9,999"` |
+| 10000 | `"10,000"` | `"9,999+"` |
 
 ```json
 {
@@ -204,7 +204,7 @@ GET /api/v1/products?keyword=마스크팩
       "productId": 1001,
       "productNumber": "1023456",
       "name": "수분 마스크팩",
-      "price": "1,000원",
+      "price": "1,000",
       "imageUrl": "https://example.com/product.png",
       "reviewCount": "12",
       "liked": false
@@ -259,7 +259,7 @@ GET /api/v1/products/1001/stores?soldOut=false
       "productId": 1001,
       "productNumber": "1075034",
       "name": "상품명",
-      "price": "5,000원",
+      "price": "5,000",
       "imageUrl": "https://example.com/product.png",
       "reviewCount": "23",
       "liked": false

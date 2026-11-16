@@ -103,8 +103,8 @@ class OpenApiDocumentationTest {
 
     @Test
     void keepsConcreteResponseModelsAndAllSerializedFields() {
-        var product = new ProductListItemResponse(1001L, "0012345", "수분 마스크팩", "1,000원",
-                "https://example.com/product.png", "9999+", false);
+        var product = new ProductListItemResponse(1001L, "0012345", "수분 마스크팩", "1,000",
+                "https://example.com/product.png", "9,999+", false);
         var store = new ProductStoreResponse(201L, "강남본점", "https://example.com/store.png",
                 BusinessStatus.CLOSED, true, 1500, 0, false);
         var list = new ProductListResponse(List.of(product));
@@ -143,8 +143,8 @@ class OpenApiDocumentationTest {
         });
         JsonNode product = media("/api/v1/products", "200").get("example").at("/data/products/0");
         assertThat(product.get("productNumber").asString()).isEqualTo("0012345");
-        assertThat(product.get("price").asString()).isEqualTo("1,000원");
-        assertThat(product.get("reviewCount").asString()).isEqualTo("9999+");
+        assertThat(product.get("price").asString()).isEqualTo("1,000");
+        assertThat(product.get("reviewCount").asString()).isEqualTo("9,999+");
         JsonNode store = media("/api/v1/products/{productId}/stores", "200").get("example").at("/data/stores/0");
         assertThat(store.get("distanceMeters").asLong()).isEqualTo(1500);
         assertThat(store.get("distance").asString()).isEqualTo("1.5km");

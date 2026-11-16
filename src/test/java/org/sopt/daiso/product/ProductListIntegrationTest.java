@@ -70,7 +70,7 @@ class ProductListIntegrationTest {
                 .andExpect(jsonPath("$.message").value("상품 목록을 조회했습니다."))
                 .andExpect(jsonPath("$.data.products[0].productNumber").value("00123"))
                 .andExpect(jsonPath("$.data.products[0].name").value("수분 마스크팩"))
-                .andExpect(jsonPath("$.data.products[0].price").value("1,000원"))
+                .andExpect(jsonPath("$.data.products[0].price").value("1,000"))
                 .andExpect(jsonPath("$.data.products[0].reviewCount").value("9,999"))
                 .andExpect(jsonPath("$.data.products[0].imageUrl").value(IMAGE))
                 .andExpect(jsonPath("$.data.products[0].liked").value(false))
@@ -131,8 +131,8 @@ class ProductListIntegrationTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"0,0,0원,0", "999,999,999원,999", "1000,1000,'1,000원','1,000'",
-            "9999,9999,'9,999원','9,999'", "10000,10000,'10,000원',9999+"})
+    @CsvSource({"0,0,0,0", "999,999,999,999", "1000,1000,'1,000','1,000'",
+            "9999,9999,'9,999','9,999'", "10000,10000,'10,000','9,999+'"})
     void formatsPriceAndReviewCountBoundaries(int price, int reviews, String shownPrice, String shownReviews)
             throws Exception {
         String number = UUID.randomUUID().toString();
