@@ -41,8 +41,8 @@ public class ProductController {
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "조회 성공",
                             useReturnTypeSchema = true, content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
                                     {"code":"SUCCESS","message":"상품 목록을 조회했습니다.","data":{"products":[{
-                                      "productId":1001,"productNumber":"0012345","name":"수분 마스크팩","price":"1,000원",
-                                      "imageUrl":"https://example.com/product.png","reviewCount":"9999+","liked":false}]}}
+                                      "productId":1001,"productNumber":"0012345","name":"수분 마스크팩","price":"1,000",
+                                      "imageUrl":"https://example.com/product.png","reviewCount":"9,999+","liked":false}]}}
                                     """))),
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", ref = "#/components/responses/InternalServerError"),
                     @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "405", ref = "#/components/responses/MethodNotAllowed")
