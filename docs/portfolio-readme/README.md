@@ -35,18 +35,18 @@ https://github.com/user-attachments/assets/65d397b9-c9f7-4214-b87c-db76447b7522
 
 ## 시스템 구조
 
-![Android 팀 화면, Spring Boot 상품·재고 API와 MySQL의 연결](assets/system.png)
+![Android 앱의 REST 요청을 Spring Boot가 상품과 재고 조회로 나누고 MySQL과 연결하는 구조](assets/system.png)
 
-[편집 가능한 시스템 구조](assets/system.drawio)
+[편집용 draw.io](assets/system.drawio) · [크게 보기 SVG](assets/system.svg)
 
 ## 배포와 데모 초기화
 
-![ARM64 CI와 GHCR을 거치는 EC2 배포, 별도로 실행하는 데모 초기화](assets/infra.png)
+![GitHub Actions와 GHCR, AWS Systems Manager를 거쳐 같은 EC2에서 실행되는 앱과 MySQL](assets/infra.png)
 
-[편집 가능한 배포 구조](assets/infra.drawio)
+[편집용 draw.io](assets/infra.drawio) · [크게 보기 SVG](assets/infra.svg)
 
 ## 검색과 재고 조회
 
-![검색어로 상품을 찾고 내부 상품 ID로 매장별 재고를 조회하는 흐름](assets/workflow.png)
+![앱에서 검색어를 보내고, 선택한 상품의 내부 ID로 매장별 재고를 조회하는 다섯 단계](assets/workflow.png)
 
-[편집 가능한 검색 흐름](assets/workflow.drawio) · [구현 근거와 로컬 API 검증](docs/evidence.md)
+[편집용 draw.io](assets/workflow.drawio) · [크게 보기 SVG](assets/workflow.svg) · [구현 근거와 로컬 API 검증](docs/evidence.md)
