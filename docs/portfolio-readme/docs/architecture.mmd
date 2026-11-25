@@ -1,0 +1,10 @@
+flowchart LR
+    A["Android 앱 · 팀 개발"] -->|"검색어 · 내부 상품 ID"| B["Spring Boot HTTP API"]
+    B --> C["상품 검색 · 좋아요 서비스"]
+    B --> D["매장별 재고 조회 · 팀 개발"]
+    C --> E[("MySQL")]
+    D --> E
+    C --> F["공통 상품 응답 DTO"]
+    D --> F
+    F --> A
+    G["Flyway · V1 → V2 → V3"] -->|검증·배포용| E
