@@ -1,2 +1,162 @@
 <?xml version='1.0' encoding='utf-8'?>
-<mxfile host="app.diagrams.net"><diagram name="검색어에서 매장별 재고까지"><mxGraphModel page="1" pageWidth="1120" pageHeight="460" grid="1" background="#ffffff"><root><mxCell id="0" /><mxCell id="1" parent="0" /><mxCell id="title" parent="1" vertex="1" value="검색어에서 매장별 재고까지" style="text;html=0;strokeColor=none;fillColor=none;align=left;fontSize=27;fontStyle=1;fontColor=#18334c;"><mxGeometry as="geometry" x="36" y="24" width="1048" height="40" /></mxCell><mxCell id="subtitle" parent="1" vertex="1" value="화면에 보이는 품번과 서버가 사용하는 내부 ID를 분리" style="text;html=0;strokeColor=none;fillColor=none;align=left;fontSize=15;fontColor=#435D72;"><mxGeometry as="geometry" x="36" y="72" width="1048" height="27" /></mxCell><mxCell id="search" parent="1" vertex="1" value="01   상품 검색&#10;상품명 또는 품번" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fontColor=#18334c;fillColor=#F8FAFC;strokeColor=#A9B8C9;strokeWidth=1.7;spacing=7;"><mxGeometry as="geometry" x="36" y="151" width="185" height="70" /></mxCell><mxCell id="matches" parent="1" vertex="1" value="02   목록 표시&#10;상품명 부분 · 품번 정확" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fontColor=#18334c;fillColor=#EAF3FF;strokeColor=#6C9ed5;strokeWidth=1.7;spacing=7;"><mxGeometry as="geometry" x="301" y="151" width="204" height="70" /></mxCell><mxCell id="sel" parent="1" vertex="1" value="03   상품 선택&#10;내부 상품 ID" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fontColor=#18334c;fillColor=#EAF3FF;strokeColor=#6C9ed5;strokeWidth=1.7;spacing=7;"><mxGeometry as="geometry" x="593" y="151" width="185" height="70" /></mxCell><mxCell id="stores" parent="1" vertex="1" value="04   매장별 재고&#10;품절 제외 기본값" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fontColor=#18334c;fillColor=#EBF8F4;strokeColor=#69AC9D;strokeWidth=1.7;spacing=7;"><mxGeometry as="geometry" x="880" y="151" width="190" height="70" /></mxCell><mxCell id="empty" parent="1" vertex="1" value="일치 없음&#10;빈 결과 반환" style="rounded=1;whiteSpace=wrap;html=0;fontSize=17;fontColor=#18334c;fillColor=#FFF5EA;strokeColor=#C68C56;strokeWidth=1.7;spacing=7;"><mxGeometry as="geometry" x="301" y="272" width="204" height="65" /></mxCell><mxCell id="e0" parent="1" edge="1" source="search" target="matches" value="검색 요청" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=blockThin;endFill=1;strokeColor=#55728E;strokeWidth=1.7;fontSize=13;fontColor=#24435A;labelBackgroundColor=#ffffff;"><mxGeometry as="geometry" relative="1" /></mxCell><mxCell id="e1" parent="1" edge="1" source="matches" target="sel" value="일치 상품" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=blockThin;endFill=1;strokeColor=#55728E;strokeWidth=1.7;fontSize=13;fontColor=#24435A;labelBackgroundColor=#ffffff;"><mxGeometry as="geometry" relative="1" /></mxCell><mxCell id="e2" parent="1" edge="1" source="sel" target="stores" value="ID로 조회" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=blockThin;endFill=1;strokeColor=#55728E;strokeWidth=1.7;fontSize=13;fontColor=#24435A;labelBackgroundColor=#ffffff;"><mxGeometry as="geometry" relative="1" /></mxCell><mxCell id="e3" parent="1" edge="1" source="matches" target="empty" value="일치 0건" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;endArrow=blockThin;endFill=1;strokeColor=#55728E;strokeWidth=1.7;fontSize=13;fontColor=#24435A;labelBackgroundColor=#ffffff;dashed=1;"><mxGeometry as="geometry" relative="1" /></mxCell></root></mxGraphModel></diagram></mxfile>
+<mxfile host="app.diagrams.net" version="32.7.4">
+  <diagram id="검색 흐름" name="검색 흐름">
+    <mxGraphModel page="1" pageWidth="760" pageHeight="442" grid="1" gridSize="10" connect="1" arrows="1" fold="1" background="#FFFFFF">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="bounds" value="" style="shape=rectangle;fillColor=#FFFFFF;strokeColor=none;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="0" y="0" width="760" height="442" as="geometry" />
+        </mxCell>
+        <mxCell id="decor1" value="03  /  사용자 흐름" style="text;html=0;align=left;verticalAlign=middle;spacing=0;fontFamily=Apple SD Gothic Neo;fontSize=13;fontColor=#14679D;fontStyle=1;fillColor=none;strokeColor=none;whiteSpace=wrap;overflow=visible;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="24" y="17" width="712" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="decor2" value="검색에는 품번, 재고 조회에는 상품 ID" style="text;html=0;align=left;verticalAlign=middle;spacing=0;fontFamily=Apple SD Gothic Neo;fontSize=27;fontColor=#172D44;fontStyle=1;fillColor=none;strokeColor=none;whiteSpace=wrap;overflow=visible;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="24" y="41" width="712" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="android" value="" style="rounded=1;arcSize=6;strokeWidth=1.4;strokeColor=#A7C8B9;fillColor=#F3FAF7;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="22" y="105" width="345" height="310" as="geometry" />
+        </mxCell>
+        <mxCell id="backend" value="" style="rounded=1;arcSize=6;strokeWidth=1.4;strokeColor=#A7C4D7;fillColor=#F3F8FC;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="393" y="105" width="343" height="310" as="geometry" />
+        </mxCell>
+        <mxCell id="decor3" value="" style="ellipse;fillColor=#DEF2E9;strokeColor=none;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="117" width="31" height="31" as="geometry" />
+        </mxCell>
+        <mxCell id="decor4" value="" style="shape=image;imageAspect=1;aspect=fixed;image=data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23087D68%22%20stroke-width%3D%222.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%2210%22%20y%3D%224%22%20width%3D%2228%22%20height%3D%2240%22%20rx%3D%225%22%2F%3E%3Cpath%20d%3D%22M17%2010h14M22%2038h4%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="43.72" y="120.72" width="23.56" height="23.56" as="geometry" />
+        </mxCell>
+        <mxCell id="decor5" value="Android 앱" style="text;html=0;align=left;verticalAlign=middle;spacing=0;fontFamily=Apple SD Gothic Neo;fontSize=19;fontColor=#172D44;fontStyle=1;fillColor=none;strokeColor=none;whiteSpace=wrap;overflow=visible;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="80" y="115" width="240" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="decor6" value="" style="ellipse;fillColor=#EAF3DB;strokeColor=none;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="411" y="117" width="31" height="31" as="geometry" />
+        </mxCell>
+        <mxCell id="decor7" value="" style="shape=image;imageAspect=1;aspect=fixed;image=data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%2356891E%22%20stroke-width%3D%222.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%2029c2-13%2015-6%2025-16%204%2014-1%2024-14%2024-5%200-9-3-11-8zM10%2038c5-6%2013-7%2021-15%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="414.72" y="120.72" width="23.56" height="23.56" as="geometry" />
+        </mxCell>
+        <mxCell id="decor8" value="Spring Boot API" style="text;html=0;align=left;verticalAlign=middle;spacing=0;fontFamily=Apple SD Gothic Neo;fontSize=19;fontColor=#172D44;fontStyle=1;fillColor=none;strokeColor=none;whiteSpace=wrap;overflow=visible;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="452" y="115" width="250" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="q" value="" style="rounded=1;arcSize=8;fillColor=#FFFFFF;strokeColor=#D4DFE7;strokeWidth=1.1;" vertex="1" parent="1">
+          <mxGeometry x="55" y="164" width="264" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="decor9" value="" style="ellipse;fillColor=#DFF2E9;strokeColor=none;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="65" y="175.0" width="43" height="43" as="geometry" />
+        </mxCell>
+        <mxCell id="decor10" value="" style="shape=image;imageAspect=1;aspect=fixed;image=data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23087D68%22%20stroke-width%3D%222.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2220%22%20cy%3D%2220%22%20r%3D%2212%22%2F%3E%3Cpath%20d%3D%22m29%2029%2010%2010%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="70.16" y="180.16" width="32.68" height="32.68" as="geometry" />
+        </mxCell>
+        <mxCell id="decor11" value="검색어 입력" style="text;html=0;align=left;verticalAlign=middle;spacing=0;fontFamily=Apple SD Gothic Neo;fontSize=17;fontColor=#172D44;fontStyle=1;fillColor=none;strokeColor=none;whiteSpace=wrap;overflow=visible;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="117" y="173" width="198" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="decor12" value="상품명 또는 화면에 보이는 품번" style="text;html=0;align=left;verticalAlign=middle;spacing=0;fontFamily=Apple SD Gothic Neo;fontSize=14;fontColor=#50657B;fontStyle=0;fillColor=none;strokeColor=none;whiteSpace=wrap;overflow=visible;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="117" y="198" width="198" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="find" value="" style="rounded=1;arcSize=8;fillColor=#FFFFFF;strokeColor=#D4DFE7;strokeWidth=1.1;" vertex="1" parent="1">
+          <mxGeometry x="438" y="164" width="270" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="decor13" value="" style="ellipse;fillColor=#E3EFF8;strokeColor=none;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="448" y="175.0" width="43" height="43" as="geometry" />
+        </mxCell>
+        <mxCell id="decor14" value="" style="shape=image;imageAspect=1;aspect=fixed;image=data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%2314679D%22%20stroke-width%3D%222.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M19%2012h21M19%2024h21M19%2036h21M8%2012h2m-2%2012h2m-2%2012h2%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="453.16" y="180.16" width="32.68" height="32.68" as="geometry" />
+        </mxCell>
+        <mxCell id="decor15" value="상품 목록 검색" style="text;html=0;align=left;verticalAlign=middle;spacing=0;fontFamily=Apple SD Gothic Neo;fontSize=17;fontColor=#172D44;fontStyle=1;fillColor=none;strokeColor=none;whiteSpace=wrap;overflow=visible;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="500" y="173" width="204" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="decor16" value="상품명 부분 일치 · 품번 정확 일치" style="text;html=0;align=left;verticalAlign=middle;spacing=0;fontFamily=Apple SD Gothic Neo;fontSize=14;fontColor=#50657B;fontStyle=0;fillColor=none;strokeColor=none;whiteSpace=wrap;overflow=visible;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="500" y="198" width="204" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="choose" value="" style="rounded=1;arcSize=8;fillColor=#FFFFFF;strokeColor=#D4DFE7;strokeWidth=1.1;" vertex="1" parent="1">
+          <mxGeometry x="55" y="253" width="264" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="decor17" value="" style="ellipse;fillColor=#DFF2E9;strokeColor=none;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="65" y="264.0" width="43" height="43" as="geometry" />
+        </mxCell>
+        <mxCell id="decor18" value="" style="shape=image;imageAspect=1;aspect=fixed;image=data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23087D68%22%20stroke-width%3D%222.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M19%2026V10a4%204%200%200%201%208%200v12l3-3%209%203v8l-6%2010H20L9%2026a3%203%200%200%201%205-4z%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="70.16" y="269.16" width="32.68" height="32.68" as="geometry" />
+        </mxCell>
+        <mxCell id="decor19" value="결과에서 상품 선택" style="text;html=0;align=left;verticalAlign=middle;spacing=0;fontFamily=Apple SD Gothic Neo;fontSize=17;fontColor=#172D44;fontStyle=1;fillColor=none;strokeColor=none;whiteSpace=wrap;overflow=visible;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="117" y="262" width="198" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="decor20" value="일치 항목이 없으면 빈 목록 표시" style="text;html=0;align=left;verticalAlign=middle;spacing=0;fontFamily=Apple SD Gothic Neo;fontSize=14;fontColor=#50657B;fontStyle=0;fillColor=none;strokeColor=none;whiteSpace=wrap;overflow=visible;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="117" y="287" width="198" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="get" value="" style="rounded=1;arcSize=8;fillColor=#FFFFFF;strokeColor=#D4DFE7;strokeWidth=1.1;" vertex="1" parent="1">
+          <mxGeometry x="438" y="253" width="270" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="decor21" value="" style="ellipse;fillColor=#E3EFF8;strokeColor=none;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="448" y="264.0" width="43" height="43" as="geometry" />
+        </mxCell>
+        <mxCell id="decor22" value="" style="shape=image;imageAspect=1;aspect=fixed;image=data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%2314679D%22%20stroke-width%3D%222.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%2022v18h30V22M6%2021l5-12h26l5%2012v3c-4%204-8%202-9-1-2%204-7%204-9%200-2%204-7%204-9%200-1%203-6%205-9%201zM21%2039V29h9v10%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="453.16" y="269.16" width="32.68" height="32.68" as="geometry" />
+        </mxCell>
+        <mxCell id="decor23" value="매장별 재고 조회" style="text;html=0;align=left;verticalAlign=middle;spacing=0;fontFamily=Apple SD Gothic Neo;fontSize=17;fontColor=#172D44;fontStyle=1;fillColor=none;strokeColor=none;whiteSpace=wrap;overflow=visible;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="500" y="262" width="204" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="decor24" value="내부 productId · 기본값은 품절 제외" style="text;html=0;align=left;verticalAlign=middle;spacing=0;fontFamily=Apple SD Gothic Neo;fontSize=14;fontColor=#50657B;fontStyle=0;fillColor=none;strokeColor=none;whiteSpace=wrap;overflow=visible;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="500" y="287" width="204" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="show" value="" style="rounded=1;arcSize=8;fillColor=#FFFFFF;strokeColor=#D4DFE7;strokeWidth=1.1;" vertex="1" parent="1">
+          <mxGeometry x="55" y="342" width="264" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="decor25" value="" style="ellipse;fillColor=#DFF2E9;strokeColor=none;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="65" y="350.5" width="43" height="43" as="geometry" />
+        </mxCell>
+        <mxCell id="decor26" value="" style="shape=image;imageAspect=1;aspect=fixed;image=data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23087D68%22%20stroke-width%3D%222.8%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M9%2022v18h30V22M6%2021l5-12h26l5%2012v3c-4%204-8%202-9-1-2%204-7%204-9%200-2%204-7%204-9%200-1%203-6%205-9%201zM21%2039V29h9v10%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="70.16" y="355.66" width="32.68" height="32.68" as="geometry" />
+        </mxCell>
+        <mxCell id="decor27" value="매장별 재고 확인" style="text;html=0;align=left;verticalAlign=middle;spacing=0;fontFamily=Apple SD Gothic Neo;fontSize=17;fontColor=#172D44;fontStyle=1;fillColor=none;strokeColor=none;whiteSpace=wrap;overflow=visible;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="117" y="351" width="198" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="decor28" value="가능한 매장과 수량을 화면에 표시" style="text;html=0;align=left;verticalAlign=middle;spacing=0;fontFamily=Apple SD Gothic Neo;fontSize=14;fontColor=#50657B;fontStyle=0;fillColor=none;strokeColor=none;whiteSpace=wrap;overflow=visible;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="117" y="376" width="198" height="23" as="geometry" />
+        </mxCell>
+        <mxCell id="decor29" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;strokeColor=#14679D;strokeWidth=2;endArrow=block;endFill=1;endSize=8;dashed=0;dashPattern=5 5;exitX=1;exitY=0.5;entryX=0;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="q" target="find">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="decor30" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;strokeColor=#087D68;strokeWidth=2;endArrow=block;endFill=1;endSize=8;dashed=0;dashPattern=5 5;exitX=0;exitY=0.81;entryX=1;entryY=0.24;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="find" target="choose">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="380" y="217" />
+              <mxPoint x="380" y="269" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="decor31" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;strokeColor=#14679D;strokeWidth=2;endArrow=block;endFill=1;endSize=8;dashed=0;dashPattern=5 5;exitX=1;exitY=0.65;entryX=0;entryY=0.65;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="choose" target="get">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="decor32" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=0;strokeColor=#087D68;strokeWidth=2;endArrow=block;endFill=1;endSize=8;dashed=0;dashPattern=5 5;exitX=0;exitY=0.9;entryX=1;entryY=0.5;exitPerimeter=0;entryPerimeter=0;" edge="1" parent="1" source="get" target="show">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="380" y="312" />
+              <mxPoint x="380" y="372" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="decor33" value="1" style="ellipse;fillColor=#087D68;strokeColor=none;align=center;verticalAlign=middle;spacing=0;fontFamily=Arial;fontColor=#FFFFFF;fontSize=15;fontStyle=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="41" y="158" width="25" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="decor34" value="2" style="ellipse;fillColor=#14679D;strokeColor=none;align=center;verticalAlign=middle;spacing=0;fontFamily=Arial;fontColor=#FFFFFF;fontSize=15;fontStyle=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="424" y="158" width="25" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="decor35" value="3" style="ellipse;fillColor=#087D68;strokeColor=none;align=center;verticalAlign=middle;spacing=0;fontFamily=Arial;fontColor=#FFFFFF;fontSize=15;fontStyle=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="41" y="247" width="25" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="decor36" value="4" style="ellipse;fillColor=#14679D;strokeColor=none;align=center;verticalAlign=middle;spacing=0;fontFamily=Arial;fontColor=#FFFFFF;fontSize=15;fontStyle=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="424" y="247" width="25" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="decor37" value="5" style="ellipse;fillColor=#087D68;strokeColor=none;align=center;verticalAlign=middle;spacing=0;fontFamily=Arial;fontColor=#FFFFFF;fontSize=15;fontStyle=1;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="41" y="337" width="25" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="decor38" value="keyword" style="text;html=0;align=center;verticalAlign=middle;spacing=0;fontFamily=Apple SD Gothic Neo;fontSize=13;fontColor=#14679D;fontStyle=1;fillColor=none;strokeColor=none;whiteSpace=wrap;overflow=visible;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="335" y="174" width="87" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="decor39" value="productId" style="text;html=0;align=center;verticalAlign=middle;spacing=0;fontFamily=Apple SD Gothic Neo;fontSize=13;fontColor=#14679D;fontStyle=1;fillColor=none;strokeColor=none;whiteSpace=wrap;overflow=visible;connectable=0;" vertex="1" parent="1">
+          <mxGeometry x="334" y="276" width="89" height="17" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
